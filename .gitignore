@@ -1,0 +1,11 @@
+.DS_Store
+*/.DS_Store
+*.ipynb
+.ipynb_checkpoints
+sample.lua
+data/
+slurm_logs/
+slurm_scripts/
+networks/
+logs
+reports
