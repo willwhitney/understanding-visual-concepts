@@ -25,6 +25,7 @@ cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
+cmd:option('--sharpening_rate', 10, 'number of feature maps')
 
 
 cmd:option('--batch_size', 10, 'number of sequences to train on in parallel')
