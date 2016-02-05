@@ -48,9 +48,9 @@ function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_si
 
     -- tie their parameters together
     -- print(enc2_conv1.data.module)
-    enc2_conv1.data.module:share(enc1_conv1.data.module, 'weight', 'bias')
-    enc2_conv2.data.module:share(enc1_conv2.data.module, 'weight', 'bias')
-    enc2_conv3.data.module:share(enc1_conv3.data.module, 'weight', 'bias')
+    enc2_conv1.data.module:share(enc1_conv1.data.module, 'weight', 'bias', 'gradWeight', 'gradBias')
+    enc2_conv2.data.module:share(enc1_conv2.data.module, 'weight', 'bias', 'gradWeight', 'gradBias')
+    enc2_conv3.data.module:share(enc1_conv3.data.module, 'weight', 'bias', 'gradWeight', 'gradBias')
 
     -- and join them together for analysis
     local encoded_join = nn.JoinTable(2)({enc1_out, enc2_out})

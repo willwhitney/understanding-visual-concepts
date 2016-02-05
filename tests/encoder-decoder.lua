@@ -22,14 +22,15 @@ local image_size = 150
 iteration = 1
 
 -- define inputs and module
-local input = torch.rand(2, 1, image_size, image_size)
+local input = torch.rand(2, 1, image_size, image_size):cuda()
 
 local network = nn.Sequential()
 network:add(nn.SplitTable(1))
 network:add(nn.ParallelTable():add(nn.Reshape(1, image_size, image_size)):add(nn.Reshape(1, image_size, image_size)))
-network:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size))
+network:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, 1))
 network:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
+network:cuda()
 
 -- test backprop, with Jacobian
 local err = jac.testJacobian(network, input)

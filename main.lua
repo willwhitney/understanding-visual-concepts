@@ -1,7 +1,6 @@
 require 'nn'
 require 'optim'
 
-
 require 'UnsupervisedEncoder'
 require 'Decoder'
 require 'data_loaders'
@@ -16,7 +15,7 @@ cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints g
 cmd:option('--datasetdir', '/om/user/wwhitney/facegen/CNN_DATASET', 'dataset source directory')
 
 -- optimization
-cmd:option('--learning_rate', 5e-4, 'learning rate')
+cmd:option('--learning_rate', 1e-4, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
 cmd:option('--learning_rate_decay_after', 15000, 'in number of examples, when to start decaying the learning rate')
 cmd:option('--learning_rate_decay_interval', 2000, 'in number of examples, how often to decay the learning rate')
@@ -26,7 +25,6 @@ cmd:option('--grad_clip', 3, 'clip gradients at this value')
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
-
 
 cmd:option('--batch_size', 10, 'number of sequences to train on in parallel')
 cmd:option('--max_epochs', 20, 'number of full passes through the training data')
@@ -45,7 +43,7 @@ cmd:option('--num_train_batches', 9000, 'number of batches to train with per epo
 cmd:option('--num_train_batches_per_type', 3000, 'number of available train batches of each data type')
 cmd:option('--num_test_batches', 1400, 'number of batches to test with')
 cmd:option('--num_test_batches_per_type', 350, 'number of available test batches of each type')
-cmd:option('--batch_size', 20, 'number of samples per batch')
+-- cmd:option('--batch_size', 20, 'number of samples per batch')
 
 -- GPU/CPU
 cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
@@ -113,7 +111,7 @@ if opt.gpu then
 end
 
 params, grad_params = model:getParameters()
-params:uniform(0.0, 0.2) -- small numbers uniform
+-- params:uniform(0.0, 0.2) -- small numbers uniform
 
 
 
@@ -164,18 +162,14 @@ params:uniform(0.0, 0.2) -- small numbers uniform
 
 -- do fwd/bwd and return loss, grad_params
 function feval(x)
-    -- if x ~= params then
-    --     error("Params not equal to given feval argument.")
-    --     params:copy(x)
-    -- end
+    if x ~= params then
+        error("Params not equal to given feval argument.")
+        params:copy(x)
+    end
     grad_params:zero()
 
     ------------------ get minibatch -------------------
     local input = load_random_mv_batch('train')
-    -- if opt.gpuid >= 0 then -- ship the input arrays to GPU
-    --     -- have to convert to float because integers can't be cuda()'d
-    --     input = input:float():cuda()
-    -- end
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode
@@ -183,12 +177,11 @@ function feval(x)
 
     output = model:forward(input)
 
-    loss = criterion:forward(output, input)
-    grad_output = criterion:backward(output, input):clone()
+    loss = criterion:forward(output, input[2])
+    grad_output = criterion:backward(output, input[2]):clone()
 
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
-
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
     collectgarbage()
@@ -204,7 +197,6 @@ local loss0 = nil
 
 for step = 1, iterations do
     iteration = step
-    print('')
     epoch = step / opt.num_train_batches
 
     local timer = torch.Timer()
