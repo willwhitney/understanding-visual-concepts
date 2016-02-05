@@ -119,6 +119,7 @@ function validate()
     local loss = 0
     model:evaluate()
 
+    local n = 0
     for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
         for i = 1, opt.num_test_batches_per_type do -- iterate over batches in the split
             -- fetch a batch
@@ -128,6 +129,7 @@ function validate()
 
             local step_loss = criterion:forward(output, input[2])
             loss = loss + step_loss
+            n = n + 1
         end
     end
 
@@ -197,7 +199,7 @@ for step = 1, iterations do
         print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
-    every now and then or on last iteration
+    -- every now and then or on last iteration
     if step % opt.eval_val_every == 0 or step == iterations then
         -- evaluate loss on validation data
         local val_loss = validate() -- 2 = validation
