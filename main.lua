@@ -1,7 +1,6 @@
 require 'nn'
 require 'optim'
-require 'cutorch'
-require 'cunn'
+
 
 require 'UnsupervisedEncoder'
 require 'Decoder'
@@ -49,7 +48,7 @@ cmd:option('--num_test_batches_per_type', 350, 'number of available test batches
 cmd:option('--batch_size', 20, 'number of samples per batch')
 
 -- GPU/CPU
-cmd:option('--gpuid', -1, 'which gpu to use. -1 = use CPU')
+cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
 cmd:text()
 
 
@@ -57,8 +56,9 @@ cmd:text()
 opt = cmd:parse(arg)
 torch.manualSeed(opt.seed)
 
-if opt.gpuid then
---    torch.setdefaulttensortype('torch.CudaTensor')
+if opt.gpu then
+    require 'cutorch'
+    require 'cunn'
 end
 
 if opt.name == 'net' then
@@ -107,7 +107,7 @@ model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
 criterion = nn.MSECriterion()
 
-if opt.gpuid then
+if opt.gpu then
     model:cuda()
     criterion:cuda()
 end

@@ -3,7 +3,7 @@ function load_mv_batch(id, dataset_name, mode)
 
     input1s = torch.zeros(19, 1, 150, 150)
     input2s = torch.zeros(19, 1, 150, 150)
-    if opt.gpuid then
+    if opt.gpu then
         data = data:cuda()
 	input1s = input1s:cuda()
 	input2s = input2s:cuda()
