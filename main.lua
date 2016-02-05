@@ -102,7 +102,7 @@ local filter_size = 5
 local image_size = 150
 
 local model = nn.Sequential()
-model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size))
+model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.sharpening_rate))
 model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
 criterion = nn.MSECriterion()
