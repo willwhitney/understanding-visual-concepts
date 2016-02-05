@@ -1,6 +1,7 @@
 require 'nn'
 require 'optim'
 require 'cutorch'
+require 'cunn'
 
 require 'UnsupervisedEncoder'
 require 'Decoder'
@@ -56,7 +57,7 @@ opt = cmd:parse(arg)
 torch.manualSeed(opt.seed)
 
 if opt.gpuid then
-    torch.setdefaulttensortype('torch.CudaTensor')
+--    torch.setdefaulttensortype('torch.CudaTensor')
 end
 
 if opt.name == 'net' then
@@ -103,11 +104,17 @@ local model = nn.Sequential()
 model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size))
 model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
+criterion = nn.MSECriterion()
+
+if opt.gpuid then
+    model:cuda()
+    criterion:cuda()
+end
 
 params, grad_params = model:getParameters()
 params:uniform(0.0, 0.2) -- small numbers uniform
 
-criterion = nn.MSECriterion()
+
 
 -- evaluate the loss over an entire split
 -- function eval_split(split_index, max_batches)
@@ -164,10 +171,10 @@ function feval(x)
 
     ------------------ get minibatch -------------------
     local input = load_random_mv_batch('train')
-    if opt.gpuid >= 0 then -- ship the input arrays to GPU
-        -- have to convert to float because integers can't be cuda()'d
-        input = input:float():cuda()
-    end
+    -- if opt.gpuid >= 0 then -- ship the input arrays to GPU
+    --     -- have to convert to float because integers can't be cuda()'d
+    --     input = input:float():cuda()
+    -- end
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode
