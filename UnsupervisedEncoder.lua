@@ -63,7 +63,7 @@ function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_si
     local controller_addc = nn.AddConstant(1e-20)(controller_sharpener)
     local controller_norm = nn.Normalize(1, 1e-100)(controller_addc)
 
-    local change_limiter = nn.ChangeLimiter()({controller_sharpener, enc1_out, enc2_out})
+    local change_limiter = nn.ChangeLimiter()({controller_norm, enc1_out, enc2_out})
 
 
     local output = {change_limiter}
