@@ -1,5 +1,5 @@
 function load_mv_batch(id, dataset_name, mode)
-    local data = torch.load(opt.datasetdir .. '/th_' .. dataset_name .. '/' .. mode .. '/batch' .. id):cuda()
+    local data = torch.load(opt.datasetdir .. '/th_' .. dataset_name .. '/' .. mode .. '/batch' .. id)
 
     input1s = torch.zeros(19, 1, 150, 150)
     input2s = torch.zeros(19, 1, 150, 150)
