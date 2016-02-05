@@ -3,9 +3,10 @@ require 'nngraph'
 
 require 'Print'
 require 'ChangeLimiter'
+require 'Noise'
 require 'ScheduledWeightSharpener'
 
-function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, sharpening_rate)
+function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, noise, sharpening_rate)
 
     local inputs = {
             nn.Identity()(),
@@ -58,7 +59,8 @@ function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_si
     -- make the "controller", which looks at the two frames and decides what's changing
     local controller_lin1 = nn.Linear(dim_hidden * 2, dim_hidden)(encoded_join)
     local controller_nonlin = nn.Sigmoid()(controller_lin1)
-    local controller_sharpener = nn.ScheduledWeightSharpener(sharpening_rate)(controller_nonlin)
+    local controller_noise = nn.Noise(noise)(controller_nonlin)
+    local controller_sharpener = nn.ScheduledWeightSharpener(sharpening_rate)(controller_noise)
 
     local controller_addc = nn.AddConstant(1e-20)(controller_sharpener)
     local controller_norm = nn.Normalize(1, 1e-100)(controller_addc)

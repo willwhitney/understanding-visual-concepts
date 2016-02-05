@@ -37,3 +37,25 @@ function load_random_mv_batch(mode)
     end
     return load_mv_batch(id, variation_name, mode_name), variation_type
 end
+
+-- function load_random_mv_batch(mode)
+--     local variation_type = math.random(3)
+--     local variation_name = ""
+--     if variation_type == 1 then
+--         variation_name = "AZ_VARIED"
+--     elseif variation_type == 2 then
+--         variation_name = "EL_VARIED"
+--     elseif variation_type == 3 then
+--         variation_name = "LIGHT_AZ_VARIED"
+--     end
+--
+--     local id, mode_name
+--     if mode == 'train' then
+--         mode_name = 'FT_training'
+--         id = math.random(opt.num_train_batches_per_type)
+--     elseif mode == 'test' then
+--     	mode_name = 'FT_test'
+--         id = math.random(opt.num_test_batches_per_type)
+--     end
+--     return load_mv_batch(id, variation_name, mode_name), variation_type
+-- end

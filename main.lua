@@ -10,6 +10,7 @@ cmd = torch.CmdLine()
 
 cmd:option('--name', 'net', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
 cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints get written')
+cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
 -- data
 cmd:option('--datasetdir', '/om/user/wwhitney/facegen/CNN_DATASET', 'dataset source directory')
@@ -24,7 +25,9 @@ cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
+
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
+cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 cmd:option('--batch_size', 10, 'number of sequences to train on in parallel')
 cmd:option('--max_epochs', 20, 'number of full passes through the training data')
@@ -100,7 +103,7 @@ local filter_size = 5
 local image_size = 150
 
 local model = nn.Sequential()
-model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.sharpening_rate))
+model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate))
 model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
 criterion = nn.MSECriterion()
@@ -109,56 +112,28 @@ if opt.gpu then
     model:cuda()
     criterion:cuda()
 end
-
 params, grad_params = model:getParameters()
--- params:uniform(0.0, 0.2) -- small numbers uniform
 
 
+function validate()
+    local loss = 0
+    model:evaluate()
 
--- evaluate the loss over an entire split
--- function eval_split(split_index, max_batches)
---     print('evaluating loss over split index ' .. split_index)
---     local n = loader.split_sizes[split_index]
---     if max_batches ~= nil then n = math.min(max_batches, n) end
---
---     loader:reset_batch_pointer(split_index) -- move batch iteration pointer for this split to front
---     local loss = 0
---     model:evaluate()
---
---     for i = 1,n do -- iterate over batches in the split
---         -- fetch a batch
---         local x, y = loader:next_batch(split_index)
---         if opt.gpuid >= 0 then -- ship the input arrays to GPU
---             -- have to convert to float because integers can't be cuda()'d
---             x = x:float():cuda()
---             y = y:float():cuda()
---         end
---
---         local primitive_index = x[1][1]
---         local input, output, primitive
---
---         local step_loss = 0
---
---         primitive = one_hot:forward(x[1])
---         input = torch.zeros(1, 18)
---         input[{1, {1, 8}}] = primitive:clone()
---         input[{1, {9, 18}}] = x[2]:clone()
---
---         output = model:forward(input)
---         step_loss = criterion:forward(output, y)
---
---         if i % 100 == 0 then
---             print("Primitive: ", primitive_index, " Loss: ", step_loss)
---             print(vis.simplestr(output[1]))
---             print(vis.simplestr(y[1]))
---         end
---
---         loss = loss + step_loss
---     end
---
---     loss = loss / n
---     return loss
--- end
+    for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
+        for i = 1, opt.num_test_batches_per_type do -- iterate over batches in the split
+            -- fetch a batch
+            local input = load_mv_batch(i, variation, 'FT_test')
+
+            output = model:forward(input)
+
+            local step_loss = criterion:forward(output, input[2])
+            loss = loss + step_loss
+        end
+    end
+
+    loss = loss / n
+    return loss
+end
 
 -- do fwd/bwd and return loss, grad_params
 function feval(x)
@@ -187,6 +162,7 @@ function feval(x)
     collectgarbage()
     return loss, grad_params
 end
+
 
 train_losses = {}
 val_losses = {}
@@ -221,36 +197,30 @@ for step = 1, iterations do
         print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
-    -- every now and then or on last iteration
-    -- if step % opt.eval_val_every == 0 or step == iterations then
-    --     -- evaluate loss on validation data
-    --     local val_loss = eval_split(2) -- 2 = validation
-    --     val_losses[step] = val_loss
-    --     print(string.format('[epoch %.3f] Validation loss: %6.8f', epoch, val_loss))
-    --
-    --
-    --
-    --     local model_file = string.format('%s/epoch%.2f_%.4f.t7', savedir, epoch, val_loss)
-    --     print('saving checkpoint to ' .. model_file)
-    --     local checkpoint = {}
-    --     checkpoint.model = model
-    --     checkpoint.opt = opt
-    --     checkpoint.train_losses = train_losses
-    --     checkpoint.val_loss = val_loss
-    --     checkpoint.val_losses = val_losses
-    --     checkpoint.step = step
-    --     checkpoint.epoch = epoch
-    --     torch.save(model_file, checkpoint)
-    --
-    --
-    --
-    --     local val_loss_log = io.open(savedir ..'/val_loss.txt', 'a')
-    --     val_loss_log:write(val_loss .. "\n")
-    --     val_loss_log:flush()
-    --     val_loss_log:close()
-    --     -- os.execute("say 'Checkpoint saved.'")
-    --     -- os.execute(string.format("say 'Epoch %.2f'", epoch))
-    -- end
+    every now and then or on last iteration
+    if step % opt.eval_val_every == 0 or step == iterations then
+        -- evaluate loss on validation data
+        local val_loss = validate() -- 2 = validation
+        val_losses[step] = val_loss
+        print(string.format('[epoch %.3f] Validation loss: %6.8f', epoch, val_loss))
+
+        local model_file = string.format('%s/epoch%.2f_%.4f.t7', savedir, epoch, val_loss)
+        print('saving checkpoint to ' .. model_file)
+        local checkpoint = {}
+        checkpoint.model = model
+        checkpoint.opt = opt
+        checkpoint.train_losses = train_losses
+        checkpoint.val_loss = val_loss
+        checkpoint.val_losses = val_losses
+        checkpoint.step = step
+        checkpoint.epoch = epoch
+        torch.save(model_file, checkpoint)
+
+        local val_loss_log = io.open(savedir ..'/val_loss.txt', 'a')
+        val_loss_log:write(val_loss .. "\n")
+        val_loss_log:flush()
+        val_loss_log:close()
+    end
 
     if step % 10 == 0 then collectgarbage() end
 
