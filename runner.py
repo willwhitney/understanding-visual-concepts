@@ -60,7 +60,7 @@ for job in jobs:
         if isinstance(job[flag], bool):
             if job[flag]:
                 jobname = jobname + "_" + flag
-                flagstring = flagstring + " -" + flag
+                flagstring = flagstring + " --" + flag
             else:
                 print "WARNING: Excluding 'False' flag " + flag
         elif flag == 'import':
@@ -68,14 +68,14 @@ for job in jobs:
             if imported_network_name in base_networks.keys():
                 network_location = base_networks[imported_network_name]
                 jobname = jobname + "_" + flag + "_" + str(imported_network_name)
-                flagstring = flagstring + " -" + flag + " " + str(network_location)
+                flagstring = flagstring + " --" + flag + " " + str(network_location)
             else:
                 jobname = jobname + "_" + flag + "_" + str(job[flag])
                 flagstring = flagstring + " --" + flag + " " + networks_prefix + "/" + str(job[flag])
         else:
             jobname = jobname + "_" + flag + "_" + str(job[flag])
-            flagstring = flagstring + " -" + flag + " " + str(job[flag])
-    flagstring = flagstring + " -name " + jobname
+            flagstring = flagstring + " --" + flag + " " + str(job[flag])
+    flagstring = flagstring + " --name " + jobname
 
     jobcommand = "th main.lua" + flagstring
 
