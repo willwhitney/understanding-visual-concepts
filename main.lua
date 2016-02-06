@@ -22,16 +22,16 @@ cmd:option('--learning_rate_decay_after', 15000, 'in number of examples, when to
 cmd:option('--learning_rate_decay_interval', 2000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
+cmd:option('--criterion', 'MSE', 'criterion to use')
+
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
-
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
-cmd:option('--batch_size', 10, 'number of sequences to train on in parallel')
-cmd:option('--max_epochs', 20, 'number of full passes through the training data')
 
+cmd:option('--max_epochs', 20, 'number of full passes through the training data')
 cmd:option('--train_frac', 0.9, 'fraction of data that goes into train set')
 cmd:option('--val_frac', 0.05, 'fraction of data that goes into validation set')
 
@@ -106,7 +106,14 @@ local model = nn.Sequential()
 model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate))
 model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
-criterion = nn.MSECriterion()
+if opt.criterion == 'MSE'
+    criterion = nn.MSECriterion()
+elseif opt.criterion == 'BCE'
+    criterion = nn.BCECriterion()
+    criterion.sizeAverage = false
+else
+    error("Invalid criterion specified!")
+end
 
 if opt.gpu then
     model:cuda()

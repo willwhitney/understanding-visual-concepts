@@ -32,6 +32,8 @@ network:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
 network:cuda()
 
+network:evaluate()
+
 -- test backprop, with Jacobian
 local err = jac.testJacobian(network, input)
 print('==> error: ' .. err)

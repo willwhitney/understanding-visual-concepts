@@ -35,7 +35,7 @@ noise_options = [0.01, 0.1]
 sharpening_rate_options = [1, 10]
 learning_rate_options = [1e-5, 3e-5, 1e-4]
 
-# jobs with feedforward controller, one metadata step at a time
+# jobs with BCECriterion
 for noise in noise_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
@@ -44,6 +44,7 @@ for noise in noise_options:
                     "sharpening_rate": sharpening_rate,
                     "learning_rate": learning_rate,
                     "gpu": True,
+                    "criterion": "BCE",
                 }
             jobs.append(job)
 
