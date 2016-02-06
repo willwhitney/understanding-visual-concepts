@@ -32,8 +32,8 @@ base_networks = {
 jobs = []
 
 noise_options = [0.01, 0.1]
-sharpening_rate_options = [1, 10]
-learning_rate_options = [1e-5, 3e-5, 1e-4]
+# sharpening_rate_options = [1, 10]
+learning_rate_options = [1e-5, 1e-4]
 
 # jobs with BCECriterion
 for noise in noise_options:
