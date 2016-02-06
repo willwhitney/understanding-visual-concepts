@@ -32,7 +32,7 @@ base_networks = {
 jobs = []
 
 noise_options = [0.01, 0.1]
-# sharpening_rate_options = [1, 10]
+sharpening_rate_options = [1]
 learning_rate_options = [1e-5, 1e-4]
 
 # jobs with BCECriterion
