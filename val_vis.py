@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='Plot dem results.')
 parser.add_argument('--name', default='default')
 # parser.add_argument('--keep_losers', default=False)
 parser.add_argument('--hide_losers', action='store_true', default=False)
+parser.add_argument('--hide_young', action='store_false', default=True)
 parser.add_argument('--loser_threshold', default=1)
 args = parser.parse_args()
 
@@ -55,22 +56,24 @@ for name in sys.stdin:
     except IOError as e:
         pass
 
-network_ages = []
-for network_name in networks:
-    network = networks[network_name]
-    network_ages.append(len(network['losses']))
 
-mean_network_age = mean(network_ages)
+if args.hide_young:
+    network_ages = []
+    for network_name in networks:
+        network = networks[network_name]
+        network_ages.append(len(network['losses']))
 
-new_networks = {}
-for network_name in networks:
-    network = networks[network_name]
-    if len(network['losses']) < (3 * mean_network_age / 4.):
-        print("Network is too young. Excluding: " + network_name)
-    else:
-        new_networks[network_name] = network
+    mean_network_age = mean(network_ages)
 
-networks = new_networks
+    new_networks = {}
+    for network_name in networks:
+        network = networks[network_name]
+        if len(network['losses']) < (3 * mean_network_age / 4.):
+            print("Network is too young. Excluding: " + network_name)
+        else:
+            new_networks[network_name] = network
+
+    networks = new_networks
 
 if args.hide_losers:
     new_networks = {}
