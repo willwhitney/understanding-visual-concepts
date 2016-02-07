@@ -110,7 +110,7 @@ if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
     criterion = nn.BCECriterion()
-    criterion.sizeAverage = false
+    -- criterion.sizeAverage = false
 else
     error("Invalid criterion specified!")
 end

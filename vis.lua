@@ -1,6 +1,8 @@
 require 'image'
 
-function save_image_grid(filepath, images)
+vis = {}
+
+function vis.save_image_grid(filepath, images)
     if images ~= nil and images[1] ~= nil then
         image_width = 150
         padding = 5
@@ -25,10 +27,10 @@ function save_image_grid(filepath, images)
         end
         image_output = image_output:reshape(1, image_output:size()[1], image_output:size()[2])
         image.save(filepath, image_output)
+    else
+        error("Invalid images:", images)
     end
 end
-
-vis = {}
 
 vis.colors = {
     HEADER = '\27[95m',
