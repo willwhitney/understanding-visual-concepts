@@ -1,3 +1,5 @@
+require 'image'
+
 function save_image_grid(filepath, images)
     if images ~= nil and images[1] ~= nil then
         image_width = 150
