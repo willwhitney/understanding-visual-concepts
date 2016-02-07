@@ -106,9 +106,9 @@ local model = nn.Sequential()
 model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate))
 model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
 
-if opt.criterion == 'MSE'
+if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
-elseif opt.criterion == 'BCE'
+elseif opt.criterion == 'BCE' then
     criterion = nn.BCECriterion()
     criterion.sizeAverage = false
 else
