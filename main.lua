@@ -18,8 +18,8 @@ cmd:option('--datasetdir', '/om/user/wwhitney/facegen/CNN_DATASET', 'dataset sou
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
-cmd:option('--learning_rate_decay_after', 15000, 'in number of examples, when to start decaying the learning rate')
-cmd:option('--learning_rate_decay_interval', 2000, 'in number of examples, how often to decay the learning rate')
+cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to start decaying the learning rate')
+cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 cmd:option('--criterion', 'MSE', 'criterion to use')
@@ -31,14 +31,14 @@ cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 
-cmd:option('--max_epochs', 20, 'number of full passes through the training data')
+cmd:option('--max_epochs', 50, 'number of full passes through the training data')
 cmd:option('--train_frac', 0.9, 'fraction of data that goes into train set')
 cmd:option('--val_frac', 0.05, 'fraction of data that goes into validation set')
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 2000, 'every how many iterations should we evaluate on validation data?')
+cmd:option('--eval_val_every', 9000, 'every how many iterations should we evaluate on validation data?')
 -- cmd:option('-eval_val_every',10,'every how many iterations should we evaluate on validation data?')
 
 -- data
