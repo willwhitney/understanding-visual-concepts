@@ -9,13 +9,19 @@ require 'UnsupervisedEncoder'
 require 'Decoder'
 require 'data_loaders'
 
+name = arg[1]
+networks = {}
+while true do
+    local line = io.read()
+    if line == nil then break end
+
+    table.insert(networks, line)
+end
+
 opt = {
         datasetdir = '/om/user/wwhitney/facegen/CNN_DATASET',
         gpu = true,
     }
-
--- networks whose names contain this string will be rendered
-search_str = "unsup"
 
 if true then
     base_directory = "/om/user/wwhitney/unsupervised-dcign/networks"
@@ -23,24 +29,24 @@ else
     base_directory = lfs.currentdir()
 end
 
-local jobname = search_str ..'_'.. os.date("%b_%d_%H_%M")
+local jobname = name ..'_'.. os.date("%b_%d_%H_%M")
 local output_path = 'reports/renderings/'..jobname
 os.execute('mkdir -p '..output_path)
 
 local dataset_types = {"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"}
 
-function getMatchingNetworkNames(search_string)
-    local results = {}
-    for network_name in lfs.dir(base_directory) do
-        local network_path = base_directory .. '/' .. network_name
-        if lfs.attributes(network_path).mode == 'directory' then
-            if string.find(network_name, search_str) then
-                table.insert(results, network_name)
-            end
-        end
-    end
-    return results
-end
+-- function getMatchingNetworkNames(search_string)
+--     local results = {}
+--     for network_name in lfs.dir(base_directory) do
+--         local network_path = base_directory .. '/' .. network_name
+--         if lfs.attributes(network_path).mode == 'directory' then
+--             if string.find(network_name, search_str) then
+--                 table.insert(results, network_name)
+--             end
+--         end
+--     end
+--     return results
+-- end
 
 function getLastSnapshot(network_name)
     local res_file = io.popen("ls -t "..paths.concat(base_directory, network_name).." | grep -i epoch | head -n 1")
@@ -84,7 +90,7 @@ for _, network in ipairs(getMatchingNetworkNames(search_string)) do
                 local normalized_embedding_change = embedding_change / embedding_change:norm(1)
                 print("Independence of embedding change: ", normalized_embedding_change:norm())
                 print("Distance between timesteps: ", embedding_change:norm())
-                
+
                 weight_norms[input_index] = weights:norm()
 
                 local image_row = {}
