@@ -58,24 +58,40 @@ for _, network in ipairs(getMatchingNetworkNames(search_string)) do
     model:evaluate()
 
     local encoder = model.modules[1]
-    local change_limiter = encoder:listModules()[32]
+    local weight_predictor = encoder:listModules()[32]
+    local previous_embedding = encoder:listModules()[13]
+    local current_embedding = encoder:listModules()[25]
+    local decoder = model.modules[2]
     for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
         local images = {}
         for i = 1, 1 do -- for now only render one batch
             -- fetch a batch
             local input = load_mv_batch(i, variation, 'FT_test')
-            output = model:forward(input)
+            local output = model:forward(input):clone()
+            local embedding_from_previous = previous_embedding.output:clone()
+            local embedding_from_current = current_embedding.output:clone()
+
+            local reconstruction_from_previous = decoder:forward(embedding_from_previous):clone()
+            local reconstruction_from_current = decoder:forward(embedding_from_current):clone()
 
             local weight_norms = torch.zeros(output:size(1))
             for input_index = 1, output:size(1) do
-                local weights = change_limiter.output[input_index]
+                local weights = weight_predictor.output[input_index]
                 local max_weight, varying_index = weights:max(1)
                 print("Varying index: " .. vis.simplestr(varying_index), "Weight: " .. vis.simplestr(max_weight))
+
+                local embedding_change = embedding_from_current[input_index] - embedding_from_previous[input_index]
+                local normalized_embedding_change = embedding_change / embedding_change:norm(1)
+                print("Independence of embedding change: ", normalized_embedding_change:norm())
+                print("Distance between timesteps: ", embedding_change:norm())
+                
                 weight_norms[input_index] = weights:norm()
 
                 local image_row = {}
                 table.insert(image_row, input[1][input_index]:float())
                 table.insert(image_row, input[2][input_index]:float())
+                table.insert(image_row, reconstruction_from_previous[input_index]:float())
+                table.insert(image_row, reconstruction_from_current[input_index]:float())
                 table.insert(image_row, output[input_index]:float())
                 table.insert(images, image_row)
             end

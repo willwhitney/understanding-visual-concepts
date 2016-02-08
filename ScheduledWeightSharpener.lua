@@ -37,15 +37,9 @@ function ScheduledWeightSharpener:updateOutput(input)
 end
 
 function ScheduledWeightSharpener:updateGradInput(input, gradOutput)
-    -- print("backward")
     local v = input:clone()
     v:clamp(0,1000000)
     local p = self:getP(iteration)
-    -- print('v backward:', v)
-    -- print('p backward:', p)
-    -- p = p[1]
-    -- self.gradInput = self.gradInput or torch.zeros(input:size())
-    -- print(self.gradInput)
 
     self.gradInput = torch.cmul(gradOutput, torch.pow(v, p - 1)) * p
 
