@@ -7,5 +7,6 @@ data/
 slurm_logs/
 slurm_scripts/
 networks/
+old_networks/
 logs
 reports
