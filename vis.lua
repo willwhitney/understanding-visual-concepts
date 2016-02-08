@@ -95,7 +95,7 @@ function vis.simplestr(tensor)
     -- print("tensor", tensor)
     -- print("tensor1", tensor[1])
     -- print(tensor)
-    str = string.format("%." .. vis.decimalPlaces .. "f", tensor[1])
+    local str = string.format("%." .. vis.decimalPlaces .. "f", tensor[1])
     for i = 2, tensor:size(1) do
         str = str .. string.format(" %." .. vis.decimalPlaces .. "f", tensor[i])
     end

@@ -50,6 +50,7 @@ function getLastSnapshot(network_name)
 end
 
 for _, network in ipairs(getMatchingNetworkNames(search_string)) do
+    print('')
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
     local model = checkpoint.model
@@ -69,7 +70,7 @@ for _, network in ipairs(getMatchingNetworkNames(search_string)) do
             for input_index = 1, output:size(1) do
                 local weights = change_limiter.output[input_index]
                 local max_weight, varying_index = weights:max(1)
-                print("Varying index: " .. vis.simplestr(varying_index), "Weight: " .. max_weight)
+                print("Varying index: " .. vis.simplestr(varying_index), "Weight: " .. vis.simplestr(max_weight))
                 weight_norms[input_index] = weights:norm()
 
                 local image_row = {}

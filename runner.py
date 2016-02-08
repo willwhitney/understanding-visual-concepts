@@ -14,9 +14,7 @@ if not os.path.exists("slurm_scripts"):
 
 networks_prefix = "networks"
 
-# networks_dir = '/om/user/wwhitney/facegen_networks/'
 base_networks = {
-        "onestep": "networks/trained_onestep/trained.t7"
     }
 
 
@@ -31,22 +29,23 @@ base_networks = {
 
 jobs = []
 
-noise_options = [0.01, 0.1]
-sharpening_rate_options = [1]
-learning_rate_options = [1e-5, 1e-4]
+noise_options = [0.05, 0.1]
+sharpening_rate_options = [5, 10]
+learning_rate_options = [1e-4, 3e-4]
+criterion_options = ["MSE", "BCE"]
 
-# jobs with BCECriterion
 for noise in noise_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
-            job = {
-                    "noise": noise,
-                    "sharpening_rate": sharpening_rate,
-                    "learning_rate": learning_rate,
-                    "gpu": True,
-                    "criterion": "BCE",
-                }
-            jobs.append(job)
+            for criterion in criterion_options:
+                job = {
+                        "noise": noise,
+                        "sharpening_rate": sharpening_rate,
+                        "learning_rate": learning_rate,
+                        "gpu": True,
+                        "criterion": criterion,
+                    }
+                jobs.append(job)
 
 
 if dry_run:
