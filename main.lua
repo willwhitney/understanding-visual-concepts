@@ -2,9 +2,7 @@ require 'nn'
 require 'optim'
 
 local UnsupervisedEncoder = require 'UnsupervisedEncoder'
-local UnsupervisedBatchNormEncoder = require 'UnsupervisedBatchNormEncoder'
 local Decoder = require 'Decoder'
-local BatchNormDecoder = require 'BatchNormDecoder'
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
@@ -107,8 +105,8 @@ local scheduler_iteration = torch.zeros(1)
 -- graph.dot(encoder.fg, 'encoder', 'encoder')
 
 local model = nn.Sequential()
-model:add(UnsupervisedBatchNormEncoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm))
-model:add(BatchNormDecoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
+model:add(UnsupervisedEncoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm))
+model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
 
 if opt.criterion == 'MSE' then
