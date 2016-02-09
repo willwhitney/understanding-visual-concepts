@@ -75,3 +75,54 @@ local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, f
 end
 
 return UnsupervisedEncoder
+
+--[[
+require 'nn'
+require 'cutorch'
+require 'cunn'
+UnsupervisedEncoder = require 'UnsupervisedEncoder'
+Decoder = require 'Decoder'
+data_loaders = require 'data_loaders'
+
+checkpoint = torch.load('networks/unsup_gpu_learning_rate_0.0003_noise_0.1_criterion_MSE_sharpening_rate_5/epoch4.00_0.0123.t7')
+model = checkpoint.model
+encoder = model.modules[1]
+mods = encoder:listModules()
+for i, mod in ipairs(mods) do print(i, mod) end
+--]]
+
+-- yields:
+
+-- 1	nn.gModule
+-- 2	nn.Identity
+-- 3	nn.SpatialConvolution(1 -> 96, 5x5)
+-- 4	nn.SpatialMaxPooling(2,2,2,2)
+-- 5	nn.Threshold
+-- 6	nn.SpatialConvolution(96 -> 48, 5x5)
+-- 7	nn.SpatialMaxPooling(2,2,2,2)
+-- 8	nn.Threshold
+-- 9	nn.SpatialConvolution(48 -> 24, 5x5)
+-- 10	nn.SpatialMaxPooling(2,2,2,2)
+-- 11	nn.Threshold
+-- 12	nn.Reshape(5400)
+-- 13	nn.Linear(5400 -> 200)
+-- 14	nn.Identity
+-- 15	nn.SpatialConvolution(1 -> 96, 5x5)
+-- 16	nn.SpatialMaxPooling(2,2,2,2)
+-- 17	nn.Threshold
+-- 18	nn.SpatialConvolution(96 -> 48, 5x5)
+-- 19	nn.SpatialMaxPooling(2,2,2,2)
+-- 20	nn.Threshold
+-- 21	nn.SpatialConvolution(48 -> 24, 5x5)
+-- 22	nn.SpatialMaxPooling(2,2,2,2)
+-- 23	nn.Threshold
+-- 24	nn.Reshape(5400)
+-- 25	nn.Linear(5400 -> 200)
+-- 26	nn.JoinTable
+-- 27	nn.Linear(400 -> 200)
+-- 28	nn.Sigmoid
+-- 29	nn.Noise
+-- 30	nn.ScheduledWeightSharpener
+-- 31	nn.AddConstant
+-- 32	nn.Normalize(1)
+-- 33	nn.ChangeLimiter

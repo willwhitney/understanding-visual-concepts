@@ -2,7 +2,9 @@ require 'nn'
 require 'optim'
 
 local UnsupervisedEncoder = require 'UnsupervisedEncoder'
+local UnsupervisedBatchNormEncoder = require 'UnsupervisedEncoder'
 local Decoder = require 'Decoder'
+local BatchNormDecoder = require 'Decoder'
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
@@ -22,6 +24,7 @@ cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how o
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 cmd:option('--criterion', 'MSE', 'criterion to use')
+cmd:option('--batch_norm', false, 'criterion to use')
 
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
@@ -103,8 +106,14 @@ local scheduler_iteration = torch.zeros(1)
 
 
 local model = nn.Sequential()
-model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
-model:add(Decoder(dim_hidden, color_channels, feature_maps))
+if opt.batch_norm then
+    model:add(UnsupervisedBatchNormEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
+    model:add(BatchNormDecoder(dim_hidden, color_channels, feature_maps))
+else
+    model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
+    model:add(Decoder(dim_hidden, color_channels, feature_maps))
+end
+
 
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()

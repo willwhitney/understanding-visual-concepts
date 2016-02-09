@@ -55,6 +55,7 @@ for _, network in ipairs(networks) do
     local previous_embedding = encoder:listModules()[13]
     local current_embedding = encoder:listModules()[25]
     local decoder = model.modules[2]
+
     for _, variation in ipairs(dataset_types) do
         local images = {}
         for i = 1, 1 do -- for now only render one batch
