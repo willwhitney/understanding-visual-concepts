@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description='Plot dem results.')
 parser.add_argument('--name', default='default')
 # parser.add_argument('--keep_losers', default=False)
 parser.add_argument('--hide_losers', action='store_true', default=False)
-parser.add_argument('--hide_young', action='store_false', default=True)
+parser.add_argument('--keep_young', action='store_true', default=False)
 parser.add_argument('--loser_threshold', default=1)
 args = parser.parse_args()
 
@@ -57,7 +57,7 @@ for name in sys.stdin:
         pass
 
 
-if args.hide_young:
+if not args.keep_young:
     network_ages = []
     for network_name in networks:
         network = networks[network_name]
