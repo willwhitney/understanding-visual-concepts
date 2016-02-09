@@ -23,7 +23,7 @@ cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to
 cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
-cmd:option('--criterion', 'MSE', 'criterion to use')
+cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'criterion to use')
 
 

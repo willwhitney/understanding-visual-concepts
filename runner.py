@@ -29,23 +29,21 @@ base_networks = {
 
 jobs = []
 
-noise_options = [0.05, 0.1]
+noise_options = [0.05]
 sharpening_rate_options = [5, 10]
 learning_rate_options = [1e-4, 3e-4]
-criterion_options = ["MSE", "BCE"]
 
 for noise in noise_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
-            for criterion in criterion_options:
-                job = {
-                        "noise": noise,
-                        "sharpening_rate": sharpening_rate,
-                        "learning_rate": learning_rate,
-                        "gpu": True,
-                        "criterion": criterion,
-                    }
-                jobs.append(job)
+            job = {
+                    "noise": noise,
+                    "sharpening_rate": sharpening_rate,
+                    "learning_rate": learning_rate,
+                    "gpu": True,
+                    "batch_norm": True,
+                }
+            jobs.append(job)
 
 
 if dry_run:
