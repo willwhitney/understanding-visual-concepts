@@ -1,8 +1,9 @@
 require 'nn'
 require 'optim'
 
-local Encoder = require 'UnsupervisedEncoder'
-local Decoder = require 'Decoder'
+local Encoder = require 'AtariEncoder'
+local Decoder = require 'AtariDecoder'
+
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
@@ -12,7 +13,8 @@ cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints g
 cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
 -- data
-cmd:option('--datasetdir', '/om/user/wwhitney/facegen/CNN_DATASET', 'dataset source directory')
+cmd:option('--datasetdir', '/om/user/wwhitney/deep-game-engine', 'dataset source directory')
+cmd:option('--dataset_name', 'dataset_DQN_breakout_trained', 'dataset source directory')
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
@@ -29,7 +31,7 @@ cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
-cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
+cmd:option('--color_channels', 3, '1 for grayscale, 3 for color')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
@@ -40,14 +42,10 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
 cmd:option('--eval_val_every', 9000, 'every how many iterations should we evaluate on validation data?')
--- cmd:option('-eval_val_every',10,'every how many iterations should we evaluate on validation data?')
 
 -- data
-cmd:option('--num_train_batches', 9000, 'number of batches to train with per epoch')
-cmd:option('--num_train_batches_per_type', 3000, 'number of available train batches of each data type')
-cmd:option('--num_test_batches', 1400, 'number of batches to test with')
-cmd:option('--num_test_batches_per_type', 350, 'number of available test batches of each type')
--- cmd:option('--batch_size', 20, 'number of samples per batch')
+cmd:option('--num_train_batches', 4000, 'number of batches to train with per epoch')
+cmd:option('--num_test_batches', 400, 'number of batches to test with')
 
 -- GPU/CPU
 cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
@@ -111,7 +109,6 @@ if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
     criterion = nn.BCECriterion()
-    -- criterion.sizeAverage = false
 else
     error("Invalid criterion specified!")
 end
@@ -127,21 +124,17 @@ function validate()
     local loss = 0
     model:evaluate()
 
-    local n = 0
-    for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
-        for i = 1, opt.num_test_batches_per_type do -- iterate over batches in the split
-            -- fetch a batch
-            local input = data_loaders.load_mv_batch(i, variation, 'FT_test')
+    for i = 1, opt.num_test_batches do -- iterate over batches in the split
+        -- fetch a batch
+        local input = data_loaders.load_atari_batch(i, 'test')
 
-            output = model:forward(input)
+        output = model:forward(input)
 
-            local step_loss = criterion:forward(output, input[2])
-            loss = loss + step_loss
-            n = n + 1
-        end
+        local step_loss = criterion:forward(output, input[2])
+        loss = loss + step_loss
     end
 
-    loss = loss / n
+    loss = loss / opt.num_test_batches
     return loss
 end
 
@@ -154,7 +147,7 @@ function feval(x)
     grad_params:zero()
 
     ------------------ get minibatch -------------------
-    local input = data_loaders.load_random_mv_batch('train')
+    local input = data_loaders.load_random_atari_batch('train')
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode

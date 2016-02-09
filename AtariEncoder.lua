@@ -6,7 +6,7 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
-local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm)
+local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm)
 
     local filter_size = 5
     local inputs = {
@@ -38,8 +38,8 @@ local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, n
     end
     enc1:add(nn.Threshold(0,1e-6))
 
-    enc1:add(nn.Reshape((feature_maps/4) * 15*15))
-    enc1:add(nn.Linear((feature_maps/4) * 15*15, dim_hidden))
+    enc1:add(nn.Reshape((feature_maps/4) * 22*16))
+    enc1:add(nn.Linear((feature_maps/4) * 22*16, dim_hidden))
 
     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
     enc1 = enc1(inputs[1])
@@ -65,4 +65,4 @@ local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, n
     return nn.gModule(inputs, output)
 end
 
-return UnsupervisedEncoder
+return AtariEncoder
