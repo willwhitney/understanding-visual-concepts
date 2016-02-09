@@ -5,8 +5,8 @@ require 'paths'
 require 'lfs'
 
 vis = require 'vis'
--- local UnsupervisedEncoder = require 'UnsupervisedEncoder'
--- local Decoder = require 'Decoder'
+require 'UnsupervisedEncoder'
+require 'Decoder'
 local data_loaders = require 'data_loaders'
 
 name = arg[1]
@@ -72,8 +72,8 @@ for _, network in ipairs(networks) do
 
                 local embedding_change = embedding_from_current[input_index] - embedding_from_previous[input_index]
                 local normalized_embedding_change = embedding_change / embedding_change:norm(1)
-                print("Independence of embedding change: ", normalized_embedding_change:norm())
-                print("Distance between timesteps: ", embedding_change:norm())
+                -- print("Independence of embedding change: ", normalized_embedding_change:norm())
+                -- print("Distance between timesteps: ", embedding_change:norm())
 
                 weight_norms[input_index] = weights:norm()
 
