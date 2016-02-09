@@ -23,8 +23,10 @@ cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to
 cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
+
+cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
-cmd:option('--batch_norm', false, 'criterion to use')
+cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
@@ -175,6 +177,16 @@ function feval(x)
 
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
+
+
+    ------------------ regularize -------------------
+    if opt.L2 > 0 then
+        -- Loss:
+        loss = loss + opt.coefL2 * params:norm(2)^2/2
+        -- Gradients:
+        grad_params:add( params:clone():mul(opt.L2) )
+    end
+
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
     collectgarbage()
