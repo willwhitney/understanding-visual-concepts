@@ -73,8 +73,8 @@ for _, network in ipairs(networks) do
                 local max_weight, varying_index = weights:max(1)
                 print("Varying index: " .. vis.simplestr(varying_index), "Weight: " .. vis.simplestr(max_weight))
 
-                local embedding_change = embedding_from_current[input_index] - embedding_from_previous[input_index]
-                local normalized_embedding_change = embedding_change / embedding_change:norm(1)
+                -- local embedding_change = embedding_from_current[input_index] - embedding_from_previous[input_index]
+                -- local normalized_embedding_change = embedding_change / embedding_change:norm(1)
                 -- print("Independence of embedding change: ", normalized_embedding_change:norm())
                 -- print("Distance between timesteps: ", embedding_change:norm())
 
