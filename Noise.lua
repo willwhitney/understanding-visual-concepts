@@ -25,7 +25,7 @@ function Noise:updateOutput(input)
     return self.output
 end
 
-function Noise:updateGradInput(input, gradOutput)
+function Noise:updateGradInput(_, gradOutput)
     self.gradInput = gradOutput:clone()
     return self.gradInput
 end

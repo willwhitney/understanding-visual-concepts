@@ -1,5 +1,5 @@
 -- require 'nn'
-local Print, parent = torch.class('nn.Print', 'nn.Module')
+local Print = torch.class('nn.Print', 'nn.Module')
 
 function Print:__init(name, just_dimensions)
     self.name = name
@@ -22,7 +22,7 @@ function Print:updateOutput(input)
     return input
 end
 
-function Print:updateGradInput(input, gradOutput)
+function Print:updateGradInput(_, gradOutput)
     if self.just_dimensions then
         print(self.name.." gradOutput dimensions:")
         if type(gradOutput) == 'table' then

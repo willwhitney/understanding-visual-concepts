@@ -1,9 +1,6 @@
 require 'nn'
 
-ChangeLimiter, parent = torch.class('nn.ChangeLimiter', 'nn.Module')
-
-function ChangeLimiter:__init()
-end
+ChangeLimiter = torch.class('nn.ChangeLimiter', 'nn.Module')
 
 function ChangeLimiter:updateOutput(input)
     -- print(input)

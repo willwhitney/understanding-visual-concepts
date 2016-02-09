@@ -1,12 +1,15 @@
-function load_mv_batch(id, dataset_name, mode)
+local data_loaders = {}
+
+function data_loaders.load_mv_batch(id, dataset_name, mode)
     local data = torch.load(opt.datasetdir .. '/th_' .. dataset_name .. '/' .. mode .. '/batch' .. id)
 
-    input1s = torch.zeros(19, 1, 150, 150)
-    input2s = torch.zeros(19, 1, 150, 150)
+    local input1s = torch.zeros(19, 1, 150, 150)
+    local input2s = torch.zeros(19, 1, 150, 150)
+
     if opt.gpu then
         data = data:cuda()
-	input1s = input1s:cuda()
-	input2s = input2s:cuda()
+    	input1s = input1s:cuda()
+    	input2s = input2s:cuda()
     end
 
     for i = 1, 19 do
@@ -16,7 +19,7 @@ function load_mv_batch(id, dataset_name, mode)
     return {input1s, input2s}
 end
 
-function load_random_mv_batch(mode)
+function data_loaders.load_random_mv_batch(mode)
     local variation_type = math.random(3)
     local variation_name = ""
     if variation_type == 1 then
@@ -35,8 +38,10 @@ function load_random_mv_batch(mode)
     	mode_name = 'FT_test'
         id = math.random(opt.num_test_batches_per_type)
     end
-    return load_mv_batch(id, variation_name, mode_name), variation_type
+    return data_loaders.load_mv_batch(id, variation_name, mode_name), variation_type
 end
+
+return data_loaders
 
 -- function load_random_mv_batch(mode)
 --     local variation_type = math.random(3)

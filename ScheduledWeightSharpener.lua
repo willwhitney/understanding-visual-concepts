@@ -13,7 +13,7 @@ function ScheduledWeightSharpener:__init(sharpening_rate)
 end
 
 function ScheduledWeightSharpener:getP(iter)
-    return math.min(1 + (iteration / 10000) * self.slope, 100)
+    return math.min(1 + (iter / 10000) * self.slope, 100)
 end
 
 function ScheduledWeightSharpener:updateOutput(input)

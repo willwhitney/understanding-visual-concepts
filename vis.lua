@@ -1,6 +1,6 @@
 require 'image'
 
-vis = {}
+local vis = {}
 
 function vis.save_image_grid(filepath, images)
     if images ~= nil and images[1] ~= nil then
@@ -116,7 +116,7 @@ function vis.prettyError(err)
         return vis.prettySingleError(err)
     elseif type(err) == 'table' then
         local str = ''
-        for i, val in ipairs(err) do
+        for _, val in ipairs(err) do
             str = str .. ' ' .. vis.prettySingleError(val)
         end
         return str
@@ -142,8 +142,8 @@ function vis.diff(a, b)
         str = vis.prettySingleError(a - b)
     elseif type(a) == 'table' and type(b) == 'table' then
         str = ''
-        for i, val in ipairs(err) do
-            str = str .. ' ' .. vis.prettySingleError(a - b)
+        for i, _ in ipairs(a) do
+            str = str .. ' ' .. vis.prettySingleError(a[i] - b[i])
         end
     elseif a.size and b.size then -- assume tensor
         local rounded = vis.round(a - b)
@@ -171,3 +171,5 @@ function vis.hist(a)
     -- print(str)
     os.execute('spark ' .. str)
 end
+
+return vis

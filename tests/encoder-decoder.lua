@@ -2,8 +2,8 @@ require 'nn'
 require 'cutorch'
 require 'cunn'
 
-require 'UnsupervisedEncoder'
-require 'Decoder'
+local UnsupervisedEncoder = require 'UnsupervisedEncoder'
+local Decoder = require 'Decoder'
 
 torch.manualSeed(1)
 -- torch.setdefaulttensortype('torch.CudaTensor')

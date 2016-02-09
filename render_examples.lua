@@ -4,10 +4,10 @@ require 'cunn'
 require 'paths'
 require 'lfs'
 
-require 'vis'
-require 'UnsupervisedEncoder'
-require 'Decoder'
-require 'data_loaders'
+vis = require 'vis'
+-- local UnsupervisedEncoder = require 'UnsupervisedEncoder'
+-- local Decoder = require 'Decoder'
+local data_loaders = require 'data_loaders'
 
 name = arg[1]
 networks = {}
@@ -23,11 +23,7 @@ opt = {
         gpu = true,
     }
 
-if true then
-    base_directory = "/om/user/wwhitney/unsupervised-dcign/networks"
-else
-    base_directory = lfs.currentdir()
-end
+base_directory = "/om/user/wwhitney/unsupervised-dcign/networks"
 
 local jobname = name ..'_'.. os.date("%b_%d_%H_%M")
 local output_path = 'reports/renderings/'..jobname
@@ -35,18 +31,6 @@ os.execute('mkdir -p '..output_path)
 
 local dataset_types = {"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"}
 
--- function getMatchingNetworkNames(search_string)
---     local results = {}
---     for network_name in lfs.dir(base_directory) do
---         local network_path = base_directory .. '/' .. network_name
---         if lfs.attributes(network_path).mode == 'directory' then
---             if string.find(network_name, search_str) then
---                 table.insert(results, network_name)
---             end
---         end
---     end
---     return results
--- end
 
 function getLastSnapshot(network_name)
     local res_file = io.popen("ls -t "..paths.concat(base_directory, network_name).." | grep -i epoch | head -n 1")
@@ -55,7 +39,7 @@ function getLastSnapshot(network_name)
     return result
 end
 
-for _, network in ipairs(getMatchingNetworkNames(search_string)) do
+for _, network in ipairs(networks) do
     print('')
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
@@ -68,11 +52,11 @@ for _, network in ipairs(getMatchingNetworkNames(search_string)) do
     local previous_embedding = encoder:listModules()[13]
     local current_embedding = encoder:listModules()[25]
     local decoder = model.modules[2]
-    for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
+    for _, variation in ipairs(dataset_types) do
         local images = {}
         for i = 1, 1 do -- for now only render one batch
             -- fetch a batch
-            local input = load_mv_batch(i, variation, 'FT_test')
+            local input = data_loaders.load_mv_batch(i, variation, 'FT_test')
             local output = model:forward(input):clone()
             local embedding_from_previous = previous_embedding.output:clone()
             local embedding_from_current = current_embedding.output:clone()

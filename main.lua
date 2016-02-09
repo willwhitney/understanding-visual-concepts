@@ -1,12 +1,11 @@
 require 'nn'
 require 'optim'
 
-require 'UnsupervisedEncoder'
-require 'Decoder'
-require 'data_loaders'
+local UnsupervisedEncoder = require 'UnsupervisedEncoder'
+local Decoder = require 'Decoder'
+local data_loaders = require 'data_loaders'
 
-
-cmd = torch.CmdLine()
+local cmd = torch.CmdLine()
 
 cmd:option('--name', 'net', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
 cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints get written')
@@ -64,7 +63,7 @@ end
 
 if opt.name == 'net' then
     local name = 'unsup_'
-    for k, v in ipairs(arg) do
+    for _, v in ipairs(arg) do
         name = name .. tostring(v) .. '_'
     end
     opt.name = name .. os.date("%b_%d_%H_%M_%S")
@@ -87,7 +86,7 @@ f:close()
 local logfile = io.open(savedir .. '/output.log', 'w')
 true_print = print
 print = function(...)
-    for i, v in ipairs{...} do
+    for _, v in ipairs{...} do
         true_print(v)
         logfile:write(tostring(v))
     end
@@ -100,11 +99,12 @@ local feature_maps = opt.feature_maps
 local color_channels = 1
 local filter_size = 5
 
-local image_size = 150
+-- local image_size = 150
+
 
 local model = nn.Sequential()
 model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate))
-model:add(Decoder(dim_hidden, color_channels, feature_maps, filter_size))
+model:add(Decoder(dim_hidden, color_channels, feature_maps))
 
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
@@ -130,7 +130,7 @@ function validate()
     for _, variation in ipairs{"AZ_VARIED", "EL_VARIED", "LIGHT_AZ_VARIED"} do
         for i = 1, opt.num_test_batches_per_type do -- iterate over batches in the split
             -- fetch a batch
-            local input = load_mv_batch(i, variation, 'FT_test')
+            local input = data_loaders.load_mv_batch(i, variation, 'FT_test')
 
             output = model:forward(input)
 
@@ -153,7 +153,7 @@ function feval(x)
     grad_params:zero()
 
     ------------------ get minibatch -------------------
-    local input = load_random_mv_batch('train')
+    local input = data_loaders.load_random_mv_batch('train')
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode
@@ -177,7 +177,7 @@ train_losses = {}
 val_losses = {}
 local optim_state = {learningRate = opt.learning_rate, alpha = opt.decay_rate}
 local iterations = opt.max_epochs * opt.num_train_batches
-local iterations_per_epoch = opt.num_train_batches
+-- local iterations_per_epoch = opt.num_train_batches
 local loss0 = nil
 
 for step = 1, iterations do

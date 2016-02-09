@@ -6,7 +6,7 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
-function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, noise, sharpening_rate)
+local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, filter_size, noise, sharpening_rate)
 
     local inputs = {
             nn.Identity()():annotate{name="input1"},
@@ -73,3 +73,5 @@ function UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_si
     -- local output = {nn.Print("End of encoder")(change_limiter)}
     return nn.gModule(inputs, output)
 end
+
+return UnsupervisedEncoder
