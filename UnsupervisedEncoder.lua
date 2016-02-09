@@ -6,8 +6,9 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
-local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, filter_size, noise, sharpening_rate, scheduler_iteration)
+local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration)
 
+    local filter_size = 5
     local inputs = {
             nn.Identity()():annotate{name="input1"},
             nn.Identity()():annotate{name="input2"},

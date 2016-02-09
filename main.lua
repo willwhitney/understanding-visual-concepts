@@ -2,9 +2,9 @@ require 'nn'
 require 'optim'
 
 local UnsupervisedEncoder = require 'UnsupervisedEncoder'
-local UnsupervisedBatchNormEncoder = require 'UnsupervisedEncoder'
+local UnsupervisedBatchNormEncoder = require 'UnsupervisedBatchNormEncoder'
 local Decoder = require 'Decoder'
-local BatchNormDecoder = require 'Decoder'
+local BatchNormDecoder = require 'BatchNormDecoder'
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
@@ -31,6 +31,7 @@ cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
+cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
@@ -99,22 +100,15 @@ print = function(...)
     logfile:flush()
 end
 
-local dim_hidden = opt.dim_hidden
-local feature_maps = opt.feature_maps
-local color_channels = 1
-local filter_size = 5
-local scheduler_iteration = torch.zeros(1)
--- local image_size = 150
 
+local scheduler_iteration = torch.zeros(1)
+
+-- encoder = UnsupervisedBatchNormEncoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm)
+-- graph.dot(encoder.fg, 'encoder', 'encoder')
 
 local model = nn.Sequential()
-if opt.batch_norm then
-    model:add(UnsupervisedBatchNormEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
-    model:add(BatchNormDecoder(dim_hidden, color_channels, feature_maps))
-else
-    model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
-    model:add(Decoder(dim_hidden, color_channels, feature_maps))
-end
+model:add(UnsupervisedBatchNormEncoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm))
+model:add(BatchNormDecoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
 
 if opt.criterion == 'MSE' then
