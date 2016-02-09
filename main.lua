@@ -98,12 +98,12 @@ local dim_hidden = opt.dim_hidden
 local feature_maps = opt.feature_maps
 local color_channels = 1
 local filter_size = 5
-
+local scheduler_iteration = torch.zeros(1)
 -- local image_size = 150
 
 
 local model = nn.Sequential()
-model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate))
+model:add(UnsupervisedEncoder(dim_hidden, color_channels, feature_maps, filter_size, opt.noise, opt.sharpening_rate, scheduler_iteration))
 model:add(Decoder(dim_hidden, color_channels, feature_maps))
 
 if opt.criterion == 'MSE' then
@@ -181,7 +181,7 @@ local iterations = opt.max_epochs * opt.num_train_batches
 local loss0 = nil
 
 for step = 1, iterations do
-    iteration = step
+    scheduler_iteration[1] = step
     epoch = step / opt.num_train_batches
 
     local timer = torch.Timer()

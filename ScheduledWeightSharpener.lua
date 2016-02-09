@@ -7,13 +7,15 @@ taken from https://github.com/kaishengtai/torch-ntm/blob/master/layers/PowTable.
 
 local ScheduledWeightSharpener, parent = torch.class('nn.ScheduledWeightSharpener', 'nn.Module')
 
-function ScheduledWeightSharpener:__init(sharpening_rate)
+function ScheduledWeightSharpener:__init(sharpening_rate, iteration_container)
     parent.__init(self)
     self.slope = sharpening_rate
+    self.iteration_container = iteration_container
 end
 
-function ScheduledWeightSharpener:getP(iter)
-    return math.min(1 + (iter / 10000) * self.slope, 100)
+function ScheduledWeightSharpener:getP()
+    local iteration = self.iteration_container[1]
+    return math.min(1 + (iteration / 10000) * self.slope, 100)
 end
 
 function ScheduledWeightSharpener:updateOutput(input)
@@ -22,7 +24,7 @@ function ScheduledWeightSharpener:updateOutput(input)
 
     -- smoothly increase the sharpening from 1 to 100
     -- iteration is defined globally in the training loop
-    local p = self:getP(iteration)
+    local p = self:getP()
     -- print('v:', v)
     -- print('p:', p)
     self.output = torch.pow(v, p)
@@ -39,7 +41,7 @@ end
 function ScheduledWeightSharpener:updateGradInput(input, gradOutput)
     local v = input:clone()
     v:clamp(0,1000000)
-    local p = self:getP(iteration)
+    local p = self:getP()
 
     self.gradInput = torch.cmul(gradOutput, torch.pow(v, p - 1)) * p
 

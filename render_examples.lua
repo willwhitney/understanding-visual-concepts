@@ -44,10 +44,13 @@ for _, network in ipairs(networks) do
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
     local model = checkpoint.model
-    iteration = checkpoint.step
+    local scheduler_iteration = torch.Tensor{checkpoint.step}
     model:evaluate()
 
     local encoder = model.modules[1]
+    local sharpener = encoder:findModules('nn.ScheduledWeightSharpener')[1]
+    sharpener.iteration_container = scheduler_iteration
+
     local weight_predictor = encoder:listModules()[32]
     local previous_embedding = encoder:listModules()[13]
     local current_embedding = encoder:listModules()[25]
