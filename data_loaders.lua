@@ -44,8 +44,8 @@ end
 function data_loaders.load_atari_batch(id, mode)
     local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
 
-    local input1s = torch.zeros(29, 1, 210, 160)
-    local input2s = torch.zeros(29, 1, 210, 160)
+    local input1s = torch.zeros(29, 3, 210, 160)
+    local input2s = torch.zeros(29, 3, 210, 160)
 
     if opt.gpu then
         data = data:cuda()

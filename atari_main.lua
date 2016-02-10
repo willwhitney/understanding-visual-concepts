@@ -30,7 +30,7 @@ cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
-cmd:option('--feature_maps', 96, 'number of feature maps')
+cmd:option('--feature_maps', 72, 'number of feature maps')
 cmd:option('--color_channels', 3, '1 for grayscale, 3 for color')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
