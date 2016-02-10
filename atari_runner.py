@@ -32,7 +32,7 @@ jobs = []
 noise_options = [0.1]
 sharpening_rate_options = [5, 10]
 learning_rate_options = [1e-4, 3e-4]
-batch_norm_options = [True]
+batch_norm_options = [False]
 heads_options = [3]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
