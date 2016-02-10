@@ -44,8 +44,8 @@ cmd:option('--print_every', 1, 'how many steps/minibatches between printing out 
 cmd:option('--eval_val_every', 9000, 'every how many iterations should we evaluate on validation data?')
 
 -- data
-cmd:option('--num_train_batches', 4000, 'number of batches to train with per epoch')
-cmd:option('--num_test_batches', 400, 'number of batches to test with')
+cmd:option('--num_train_batches', 8000, 'number of batches to train with per epoch')
+cmd:option('--num_test_batches', 900, 'number of batches to test with')
 
 -- GPU/CPU
 cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
