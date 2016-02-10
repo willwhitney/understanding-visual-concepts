@@ -6,7 +6,7 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
-local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm)
+local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm, num_heads)
 
     local filter_size = 5
     local inputs = {
@@ -45,23 +45,35 @@ local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     enc1 = enc1(inputs[1])
     enc2 = enc2(inputs[2])
 
-    -- and join them together for analysis
-    local encoded_join = nn.JoinTable(2)({enc1, enc2}):annotate{name="encoded_join"}
 
-    -- make the "controller", which looks at the two frames and decides what's changing
-    local controller_lin1 = nn.Linear(dim_hidden * 2, dim_hidden)(encoded_join):annotate{name="controller_lin1"}
-    local controller_nonlin = nn.Sigmoid()(controller_lin1):annotate{name="controller_nonlin"}
-    local controller_noise = nn.Noise(noise)(controller_nonlin):annotate{name="controller_noise"}
-    local controller_sharpener = nn.ScheduledWeightSharpener(sharpening_rate, scheduler_iteration)(controller_noise):annotate{name="controller_sharpener"}
+    -- make the heads to analyze the encodings
+    local heads = {}
+    heads[1] = nn.Sequential()
+    heads[1]:add(nn.JoinTable(2))
+    heads[1]:add(nn.Linear(dim_hidden * 2, dim_hidden))
+    heads[1]:add(nn.Sigmoid())
+    heads[1]:add(nn.Noise(noise))
+    heads[1]:add(nn.ScheduledWeightSharpener(sharpening_rate, scheduler_iteration))
+    heads[1]:add(nn.AddConstant(1e-20))
+    heads[1]:add(nn.Normalize(1, 1e-100))
 
-    local controller_addc = nn.AddConstant(1e-20)(controller_sharpener):annotate{name="controller_addc"}
-    local controller_norm = nn.Normalize(1, 1e-100)(controller_addc):annotate{name="controller_norm"}
+    for i = 2, num_heads do
+        heads[i] = heads[1]:clone()
+    end
 
-    local change_limiter = nn.ChangeLimiter()({controller_norm, enc1, enc2}):annotate{name="change_limiter"}
+    for i = 1, num_heads do
+        heads[i] = heads[i]{enc1, enc2}
+    end
+
+    -- combine the distributions from all heads
+    local dist_adder = nn.CAddTable()(heads)
+    local dist_clamp = nn.Clamp(0, 1)(dist_adder)
+
+    -- and use it to filter the encodings
+    local change_limiter = nn.ChangeLimiter()({dist_clamp, enc1, enc2}):annotate{name="change_limiter"}
 
 
     local output = {change_limiter}
-    -- local output = {nn.Print("End of encoder")(change_limiter)}
     return nn.gModule(inputs, output)
 end
 

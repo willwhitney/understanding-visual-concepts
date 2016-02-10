@@ -29,6 +29,8 @@ cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 
+cmd:option('--heads', 1, 'how many filtering heads to use')
+
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
 cmd:option('--color_channels', 3, '1 for grayscale, 3 for color')
@@ -97,13 +99,11 @@ end
 
 local scheduler_iteration = torch.zeros(1)
 
--- encoder = UnsupervisedBatchNormEncoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm)
--- graph.dot(encoder.fg, 'encoder', 'encoder')
-
 local model = nn.Sequential()
-model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm))
+model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
 model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
+-- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
