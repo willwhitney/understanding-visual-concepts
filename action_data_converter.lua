@@ -18,20 +18,12 @@ local bsize = 30
 function load_data(dataset_name, dataset_folder)
     local dataset_file = hdf5.open(dataset_folder .. '/' .. dataset_name, 'r')
     local examples = {}
-    -- Get all keys: note they might not be in order though!
     for action,data in pairs(dataset_file:all()) do
-        -- local action_folder = paths.concat(to_save_folder,action)
-        -- paths.mkdir(action_folder)
-        -- local i = 0
         for j = 1,data:size(1)-bsize,bsize do
             local batch = data[{{j,j+bsize-1}}]
-            -- local batchname = paths.concat(action_folder, 'batch'..i)
-            -- torch.save(batchname,batch)
             table.insert(examples, batch)
-            -- i+=1
         end
     end
-    -- print(examples)
     return examples
 end
 
@@ -70,7 +62,6 @@ function save_batches(datasets, savefolder)
         local i = 1
         for _,b in pairs(data) do
             xlua.progress(i, #data)
-            -- print(b:size())
             b = b:float()
             local batchname = paths.concat(subfolder, 'batch'..i)
             torch.save(batchname, b)

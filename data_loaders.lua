@@ -41,6 +41,8 @@ function data_loaders.load_random_mv_batch(mode)
     return data_loaders.load_mv_batch(id, variation_name, mode_name), variation_type
 end
 
+
+
 function data_loaders.load_atari_batch(id, mode)
     local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
 
@@ -71,3 +73,35 @@ function data_loaders.load_random_atari_batch(mode)
 end
 
 return data_loaders
+
+
+
+function data_loaders.load_action_batch(id, mode)
+    local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
+    data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
+
+    local input1s = torch.zeros(29, 1, 120, 160)
+    local input2s = torch.zeros(29, 1, 120, 160)
+
+    if opt.gpu then
+        data = data:cuda()
+    	input1s = input1s:cuda()
+    	input2s = input2s:cuda()
+    end
+
+    for i = 1, 29 do
+        input1s[i] = data[i]
+        input2s[i] = data[i + 1]
+    end
+    return {input1s, input2s}
+end
+
+function data_loaders.load_random_action_batch(mode)
+    local id
+    if mode == 'train' then
+        id = math.random(opt.num_train_batches)
+    elseif mode == 'test' then
+        id = math.random(opt.num_train_batches)
+    end
+    return data_loaders.load_action_batch(id, mode)
+end
