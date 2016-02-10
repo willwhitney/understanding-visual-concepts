@@ -15,6 +15,9 @@ while true do
     local line = io.read()
     if line == nil then break end
 
+    -- strip whitespace
+    line = string.gsub(line, "%s+", "")
+
     table.insert(networks, line)
 end
 
@@ -43,17 +46,18 @@ for _, network in ipairs(networks) do
     print('')
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
-    local model = checkpoint.model
+    model = checkpoint.model
     local scheduler_iteration = torch.Tensor{checkpoint.step}
     model:evaluate()
 
     local encoder = model.modules[1]
     local sharpener = encoder:findModules('nn.ScheduledWeightSharpener')[1]
     sharpener.iteration_container = scheduler_iteration
+    print("Current sharpening: ", sharpener:getP())
 
     local weight_predictor = encoder:findModules('nn.Normalize')[1]
-    local previous_embedding = encoder:findModules('nn.Sequential')[1]
-    local current_embedding = encoder:findModules('nn.Sequential')[2]
+    local previous_embedding = encoder:findModules('nn.Linear')[1]
+    local current_embedding = encoder:findModules('nn.Linear')[2]
     local decoder = model.modules[2]
 
     for _, variation in ipairs(dataset_types) do
