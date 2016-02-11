@@ -73,7 +73,6 @@ function data_loaders.load_random_atari_batch(mode)
 end
 
 
-
 function data_loaders.load_action_batch(id, mode)
     local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
     data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
