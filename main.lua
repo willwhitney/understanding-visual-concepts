@@ -26,6 +26,7 @@ cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
+cmd:option('--heads', 1, 'how many filtering heads to use')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
@@ -103,7 +104,7 @@ local scheduler_iteration = torch.zeros(1)
 -- graph.dot(encoder.fg, 'encoder', 'encoder')
 
 local model = nn.Sequential()
-model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm))
+model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
 model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
 
