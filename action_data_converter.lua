@@ -62,6 +62,7 @@ function save_batches(datasets, savefolder)
         local i = 1
         for _,b in pairs(data) do
             xlua.progress(i, #data)
+            b = b/255  -- normalize
             b = b:float()
             local batchname = paths.concat(subfolder, 'batch'..i)
             torch.save(batchname, b)
