@@ -72,9 +72,6 @@ function data_loaders.load_random_atari_batch(mode)
     return data_loaders.load_atari_batch(id, mode)
 end
 
-return data_loaders
-
-
 
 function data_loaders.load_action_batch(id, mode)
     local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
@@ -105,3 +102,5 @@ function data_loaders.load_random_action_batch(mode)
     end
     return data_loaders.load_action_batch(id, mode)
 end
+
+return data_loaders
