@@ -38,8 +38,8 @@ local ActionEncoder = function(dim_hidden, color_channels, feature_maps, noise, 
     end
     enc1:add(nn.Threshold(0,1e-6))
 
-    enc1:add(nn.Reshape((feature_maps/4) * 16*12))
-    enc1:add(nn.Linear((feature_maps/4) * 16*12, dim_hidden))
+    enc1:add(nn.Reshape((feature_maps/4) * 16*11))
+    enc1:add(nn.Linear((feature_maps/4) * 16*11, dim_hidden))
 
     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
     enc1 = enc1(inputs[1])

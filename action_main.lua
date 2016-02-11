@@ -9,11 +9,11 @@ local data_loaders = require 'data_loaders'
 local cmd = torch.CmdLine()
 
 cmd:option('--name', 'net', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
-cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints get written')
+cmd:option('--checkpoint_dir', 'logslink', 'output directory where checkpoints get written')
 cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
 -- data
-cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all', 'dataset source directory')  -- change
+cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all_norm', 'dataset source directory')  -- change
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
@@ -27,7 +27,7 @@ cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
-cmd:option('--heads', 1, 'how many filtering heads to use')
+cmd:option('--heads', 3, 'how many filtering heads to use')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
@@ -48,7 +48,7 @@ cmd:option('--num_train_batches', 1347, 'number of batches to train with per epo
 cmd:option('--num_test_batches', 289, 'number of batches to test with')
 
 -- GPU/CPU
-cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
+cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
 cmd:text()
 
 

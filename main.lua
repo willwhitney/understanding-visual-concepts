@@ -3,6 +3,7 @@ require 'optim'
 
 local Encoder = require 'UnsupervisedEncoder'
 local Decoder = require 'Decoder'
+
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()

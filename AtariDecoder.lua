@@ -1,5 +1,6 @@
 require 'nn'
 
+-- transforms ()
 local AtariDecoder = function(dim_hidden, color_channels, feature_maps, batch_norm)
     local decoder = nn.Sequential()
     decoder:add(nn.Linear(dim_hidden, (feature_maps/4)*19*16 ))

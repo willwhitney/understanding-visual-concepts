@@ -11,10 +11,10 @@ subsample = 5
 
 action_data = {}
 
-for action in actions[:2]:
+for action in actions:
     action_vid_folder = os.path.join(root,action)
     action_vids = []
-    for vid in os.listdir(action_vid_folder)[:2]:
+    for vid in os.listdir(action_vid_folder):
         cap = cv2.VideoCapture(os.path.join(action_vid_folder, vid))
         num_frames = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
         video = []
