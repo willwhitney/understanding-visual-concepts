@@ -124,7 +124,7 @@ function validate()
 
     for i = 1, opt.num_test_batches do -- iterate over batches in the split
         -- fetch a batch
-        local input = data_loaders.load_action_batch(i, 'val')
+        local input = data_loaders.load_action_batch(i, 'test')
 
         output = model:forward(input)
 

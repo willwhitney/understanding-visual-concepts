@@ -74,7 +74,7 @@ end
 
 
 function data_loaders.load_action_batch(id, mode)
-    local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name .. '/' .. mode .. '/images_batch_' .. id)
+    local data = torch.load(opt.datasetdir .. '/' .. mode .. '/batch_' .. id)
     data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
 
     local input1s = torch.zeros(29, 1, 120, 160)
