@@ -5,7 +5,8 @@ import utils as u
 import numpy as np
 import itertools
 
-root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/unsupervised-dcign/data/actions/raw/videos'
+# root = '/om/data/public/mbchang/udcign-data/action/raw/videos'
+root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/videos'
 actions = ['boxing', 'handclapping', 'handwaving', 'jogging', 'running', 'walking']
 subsample = 5
 
@@ -25,7 +26,11 @@ for action in actions:
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # shape: (height, width)
             if i % subsample == 0:
+                gray = gray/float(255)  # normalize
+                gray = gray.astype('float32')
+
                 video.append(gray)
+
                 # cv2.imshow('frame',gray)
                 # import time
                 # time.sleep(0.5)
@@ -39,17 +44,16 @@ for action in actions:
         video = u.stack(video)
         if video.shape[0] % 2 != 0: video = video[:-1,:,:]
         action_vids.append(video)  # video, subsampled, evenly spaced
-        print(video.shape)
 
     action_vids = np.vstack(action_vids)  # odd idxes are tm1, even are t
 
-    # randomly permute
-    tm1s = np.random.permutation(range(0,len(action_vids)-1,2))
-    ts = np.array([i+1 for i in tm1s])
-    shuffle_idxs = list(it.next() for it in itertools.cycle([iter(tm1s), iter(ts)]))
-    action_vids = action_vids[np.array(shuffle_idxs),:,:]
+    # randomly permute  -- don't do this!
+    # tm1s = np.random.permutation(range(0,len(action_vids)-1,2))
+    # ts = np.array([i+1 for i in tm1s])
+    # shuffle_idxs = list(it.next() for it in itertools.cycle([iter(tm1s), iter(ts)])) # groups of 2
+    # action_vids = action_vids[np.array(shuffle_idxs),:,:]
 
     action_data[action] = action_vids
 
 # save
-u.save_dict_to_hdf5(action_data, 'test_actions_2_frame_subsample_' + str(subsample), root)
+u.save_dict_to_hdf5(action_data, 'actions_2_frame_subsample_' + str(subsample), root)
