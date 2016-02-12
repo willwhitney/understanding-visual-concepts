@@ -34,8 +34,8 @@ base_networks = {
 jobs = []
 
 noise_options = [0.1]
-sharpening_rate_options = [5, 10]
-learning_rate_options = [1e-4, 2e-4]
+sharpening_rate_options = [5]
+learning_rate_options = [20e-5,30e-5,35e-5,40e-5]
 heads_options = [3]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
@@ -98,10 +98,17 @@ for job in jobs:
             slurmfile.write("#SBATCH --job-name"+"=" + jobname + "\n")
             slurmfile.write("#SBATCH --output=slurm_logs/" + jobname + ".out\n")
             # slurmfile.write("#SBATCH --error=slurm_logs/" + jobname + ".err\n")
+            slurmfile.write("#SBATCH -N 1\n")
+            slurmfile.write("#SBATCH -c 2\n")
+            slurmfile.write("#SBATCH -p gpu\n")
+            slurmfile.write("#SBATCH --gres=gpu:1\n")
+            slurmfile.write("#SBATCH --mem=5000\n")
+            slurmfile.write("#SBATCH --time=6-23:00:00\n")
             slurmfile.write(jobcommand)
 
         if not dry_run:
-            if 'gpu' in job and job['gpu']:
-                os.system("sbatch -N 1 -c 2 --gres=gpu:1 -p gpu --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
-            else:
-                os.system("sbatch -N 1 -c 2 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+            # if 'gpu' in job and job['gpu']:
+            #     os.system("sbatch -N 1 -c 2 --gres=gpu:1 -p gpu --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+            # else:
+            #     os.system("sbatch -N 1 -c 2 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+            os.system("sbatch slurm_scripts/" + jobname + ".slurm &")
