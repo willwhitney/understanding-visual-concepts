@@ -65,13 +65,18 @@ local UnsupervisedEncoder = function(dim_hidden, color_channels, feature_maps, n
         heads[i] = heads[i]{enc1, enc2}
     end
 
-    -- combine the distributions from all heads
-    local dist_adder = nn.CAddTable()(heads)
-    local dist_clamp = nn.Clamp(0, 1)(dist_adder)
+    local dist
+    if num_heads > 1 then
+        -- combine the distributions from all heads
+        local dist_adder = nn.CAddTable()(heads)
+        local dist_clamp = nn.Clamp(0, 1)(dist_adder)
+        dist = dist_clamp
+    else
+        dist = heads[1]
+    end
 
     -- and use it to filter the encodings
-    local change_limiter = nn.ChangeLimiter()({dist_clamp, enc1, enc2}):annotate{name="change_limiter"}
-
+    local change_limiter = nn.ChangeLimiter()({dist, enc1, enc2}):annotate{name="change_limiter"}
 
     local output = {change_limiter}
     return nn.gModule(inputs, output)
