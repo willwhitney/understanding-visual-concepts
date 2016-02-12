@@ -30,24 +30,32 @@ base_networks = {
 jobs = []
 
 noise_options = [0.1]
-sharpening_rate_options = [5, 10]
-learning_rate_options = [1e-4, 2e-4]
-heads_options = [3]
+sharpening_rate_options = [10]
+learning_rate_options = [2e-4]
+heads_options = [1, 3]
+motion_scale_options = [3, 10]
+frame_interval_options = [3, 10]
+dataset_name_options = ["breakout", "space_invaders"]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 for noise in noise_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
             for heads in heads_options:
-                job = {
-                        "noise": noise,
-                        "sharpening_rate": sharpening_rate,
-                        "learning_rate": learning_rate,
-                        "heads": heads,
-                        "dataset_name": "space_invaders",
-                        "gpu": True,
-                    }
-                jobs.append(job)
+                for motion_scale in motion_scale_options:
+                    for frame_interval in frame_interval_options:
+                        for dataset_name in dataset_name_options:
+                            job = {
+                                    "noise": noise,
+                                    "sharpening_rate": sharpening_rate,
+                                    "learning_rate": learning_rate,
+                                    "heads": heads,
+                                    "motion_scale": motion_scale,
+                                    "frame_interval": frame_interval,
+                                    "dataset_name": dataset_name,
+                                    "gpu": True,
+                                }
+                            jobs.append(job)
 
 
 if dry_run:
