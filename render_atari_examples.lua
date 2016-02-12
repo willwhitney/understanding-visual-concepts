@@ -10,6 +10,7 @@ require 'AtariDecoder'
 local data_loaders = require 'data_loaders'
 
 name = arg[1]
+-- dataset_name = arg[2] or name
 networks = {}
 while true do
     local line = io.read()
@@ -21,11 +22,11 @@ while true do
     table.insert(networks, line)
 end
 
-opt = {
-        datasetdir = '/om/user/wwhitney/deep-game-engine',
-        dataset_name = 'dataset_DQN_breakout_trained',
-        gpu = true,
-    }
+-- opt = {
+--         datasetdir = '/om/user/wwhitney/deep-game-engine',
+--         dataset_name = dataset_name,
+--         gpu = true,
+--     }
 
 base_directory = "/om/user/wwhitney/unsupervised-dcign/networks"
 
@@ -42,10 +43,13 @@ function getLastSnapshot(network_name)
 end
 
 for _, network in ipairs(networks) do
+    collectgarbage()
+
     print('')
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
-    model = checkpoint.model
+    opt = checkpoint.opt
+    local model = checkpoint.model
     local scheduler_iteration = torch.Tensor{checkpoint.step}
     model:evaluate()
 
@@ -60,7 +64,7 @@ for _, network in ipairs(networks) do
     local decoder = model.modules[2]
 
     local images = {}
-    for i = 1, 1 do -- for now only render one batch
+    for i = 489, 489 do -- for now only render one batch
         -- fetch a batch
         local input = data_loaders.load_atari_batch(i, 'test')
         local output = model:forward(input):clone()

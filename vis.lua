@@ -4,28 +4,38 @@ local vis = {}
 
 function vis.save_image_grid(filepath, images)
     if images ~= nil and images[1] ~= nil then
-        image_width = 150
+        colors = images[1][1]:size(1)
+        image_width = images[1][1]:size(3)
+        image_height = images[1][1]:size(2)
+        -- print(image_width, image_height)
+        -- print(images[1][1]:size())
         padding = 5
         images_across = #images[1]
         images_down = #images
         -- print(images_down, images_across)
 
         image_output = torch.zeros(
-            image_width * images_down + (images_down - 1) * padding,
+            colors,
+            image_height * images_down + (images_down - 1) * padding,
             image_width * images_across + (images_across - 1) * padding)
+        -- print(image_output:size())
         for i, image_row in ipairs(images) do
             for j, image in ipairs(image_row) do
+                -- print(image:sum())
                 y_index = j - 1
                 y_location = y_index * image_width + y_index * padding
                 x_index = i - 1
-                x_location = (x_index) * image_width + x_index * padding
-                -- print({{x_location + 1, x_location + image_width},
-                --           {y_location + 1, y_location + image_width}})
-                image_output[{{x_location + 1, x_location + image_width},
-                {y_location + 1, y_location + image_width}}] = image
+                x_location = (x_index) * image_height + x_index * padding
+
+                -- print({{x_location + 1, x_location + image_height},
+                --        {y_location + 1, y_location + image_width}})
+
+                image_output[{{},
+                              {x_location + 1, x_location + image_height},
+                              {y_location + 1, y_location + image_width}}] = image
             end
         end
-        image_output = image_output:reshape(1, image_output:size()[1], image_output:size()[2])
+        -- image_output = image_output:reshape(colors, image_output:size()[1], image_output:size()[2])
         image.save(filepath, image_output)
     else
         error("Invalid images:", images)
