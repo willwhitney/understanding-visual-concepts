@@ -106,6 +106,6 @@ for job in jobs:
 
         if not dry_run:
             if 'gpu' in job and job['gpu']:
-                os.system("sbatch -N 1 -c 2 --gres=gpu:1 -p gpu --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+                os.system("sbatch -N 1 -c 2 --gres=gpu:1 -p gpu --mem=8000 --time=6-23:00:00 -x node027 slurm_scripts/" + jobname + ".slurm &")
             else:
                 os.system("sbatch -N 1 -c 2 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
