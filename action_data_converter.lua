@@ -21,7 +21,7 @@ function load_data(dataset_name, dataset_folder)
     for action,data in pairs(dataset_file:all()) do
         for j = 1,data:size(1)-bsize,bsize do
             local batch = data[{{j,j+bsize-1}}]
-            table.insert(examples, batch)
+            table.insert(examples, batch)  -- each batch is a contiguous sequence
         end
     end
     return examples
@@ -62,7 +62,6 @@ function save_batches(datasets, savefolder)
         local i = 1
         for _,b in pairs(data) do
             xlua.progress(i, #data)
-            b = b/255  -- normalize
             b = b:float()
             local batchname = paths.concat(subfolder, 'batch'..i)
             torch.save(batchname, b)
