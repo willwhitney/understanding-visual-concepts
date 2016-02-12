@@ -13,7 +13,7 @@ cmd:option('--checkpoint_dir', 'logslink', 'output directory where checkpoints g
 cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
 -- data
-cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all_norm', 'dataset source directory')  -- change
+cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all', 'dataset source directory')  -- change
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
@@ -40,12 +40,12 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
-cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 9000, 'every how many iterations should we evaluate on validation data?')
+cmd:option('--print_every', 10, 'how many steps/minibatches between printing out the loss')
+cmd:option('--eval_val_every', 1347, 'every how many iterations should we evaluate on validation data?')
 
 -- data
 cmd:option('--num_train_batches', 1347, 'number of batches to train with per epoch')
-cmd:option('--num_test_batches', 289, 'number of batches to test with')
+cmd:option('--num_test_batches', 288, 'number of batches to test with')
 
 -- GPU/CPU
 cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
@@ -189,6 +189,7 @@ for step = 1, iterations do
     local timer = torch.Timer()
 
     local _, loss = optim.rmsprop(feval, params, optim_state)
+    -- print(params:norm())  -- params are definitely getting updated
 
     local time = timer:time().real
 
