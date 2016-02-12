@@ -101,8 +101,7 @@ function MotionBCECriterion:updateScalingMask(target)
    -- find all the places in each frame that changed since the frame before
    -- all of the "forward in time" changes
    self.mask[{{2, nBatches}}] = target[{{2, nBatches}}] - target[{{1, nBatches - 1}}]
-   print(self.mask:sum())
-   self.mask = self.mask:abs()
+   self.mask:abs()
 
    -- also find all the "backward in time" changes
    -- these are the same places in the frames;
@@ -110,14 +109,15 @@ function MotionBCECriterion:updateScalingMask(target)
    self.mask[{{1, nBatches - 1}}] = self.mask[{{1, nBatches - 1}}]
                                     + self.mask[{{2, nBatches}}]--:clone()
 
+   self.mask:abs():sign()
    -- normalize the tmask to be 1 where things changed, 0 otherwise
-   self.mask:apply(function(el)
-      if el > 0 then
-         return 1
-      else
-         return 0
-         end
-      end)
+   -- self.mask:apply(function(el)
+   --    if el > 0 then
+   --       return 1
+   --    else
+   --       return 0
+   --       end
+   --    end)
 
    -- scale by the importance we assign to motion
    self.mask = self.mask * self.motionScale
