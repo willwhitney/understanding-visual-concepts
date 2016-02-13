@@ -4,6 +4,7 @@ import copy
 import utils as u
 import numpy as np
 import itertools
+from progressbar import ProgressBar
 
 # Usage: The videos are saved in '/om/data/public/mbchang/udcign-data/action/raw/videos'
 # I haven't figured out how to use cv2 on openmind yet, so copy the videos
@@ -11,45 +12,50 @@ import itertools
 # each of the actions below under the videos folder
 
 root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/videos'
+out = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/hdf5'
 actions = ['boxing', 'handclapping', 'handwaving', 'jogging', 'running', 'walking']
-subsample = 5
+subsample = 1
+gray = True
 
 action_data = {}
 
 for action in actions:
+    print action
     action_vid_folder = os.path.join(root,action)
-    action_vids = []
-    for vid in os.listdir(action_vid_folder):
+    action_vids = {}
+    pbar = ProgressBar()
+    for i in pbar(range(len(os.listdir(action_vid_folder)))):
+        vid = os.listdir(action_vid_folder)[i]
         cap = cv2.VideoCapture(os.path.join(action_vid_folder, vid))
         num_frames = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
         video = []
+        # pbar = ProgressBar()
 
-        i = 0
-        while(i < num_frames):
+        # the frames are guaranteed to be consecutive
+        for i in range(int(num_frames)):
             ret, frame = cap.read()
 
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # shape: (height, width)
+            if gray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # shape: (height, width)  it is gray anyway
             if i % subsample == 0:
-                gray = gray/float(255)  # normalize
-                gray = gray.astype('float32')
+                frame = frame/float(255)  # normalize
+                frame = frame.astype('float32')
+                # cv2.imshow('frame',frame)
+                if gray: frame = np.tile(frame,(1,1,1))  # give it the channel dim
+                video.append(frame)
 
-                video.append(gray)
-
-                # cv2.imshow('frame',gray)
                 # import time
                 # time.sleep(0.5)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            i += 1
-
         cap.release()
         cv2.destroyAllWindows()
 
         video = u.stack(video)
-        if video.shape[0] % 2 != 0: video = video[:-1,:,:]
-        action_vids.append(video)  # video, subsampled, evenly spaced
+        action_vids[vid] = video  # video, subsampled, evenly spaced, consecutive video
+    pbar.finish()
+    u.save_dict_to_hdf5(dataset=action_vids, dataset_name=action+'_subsamp='+str(subsample), dataset_folder=out)
 
-    action_vids = np.vstack(action_vids)  # consecutive video
+    # action_vids = np.vstack(action_vids)  # consecutive video  ACTUALLY THIS MIGHT NOT BE TRUE. WE NEED THE VIDEOS TO BE SEPARATE!
 
     # randomly permute  -- don't do this!
     # tm1s = np.random.permutation(range(0,len(action_vids)-1,2))
@@ -57,7 +63,7 @@ for action in actions:
     # shuffle_idxs = list(it.next() for it in itertools.cycle([iter(tm1s), iter(ts)])) # groups of 2
     # action_vids = action_vids[np.array(shuffle_idxs),:,:]
 
-    action_data[action] = action_vids
+    # action_data[action] = action_vids
 
 # save
-u.save_dict_to_hdf5(action_data, 'actions_2_frame_subsample_' + str(subsample), root)
+# u.save_dict_to_hdf5(action_data, 'actions_2_frame_subsample_' + str(subsample), root)
