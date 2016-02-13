@@ -5,7 +5,11 @@ import utils as u
 import numpy as np
 import itertools
 
-# root = '/om/data/public/mbchang/udcign-data/action/raw/videos'
+# Usage: The videos are saved in '/om/data/public/mbchang/udcign-data/action/raw/videos'
+# I haven't figured out how to use cv2 on openmind yet, so copy the videos
+# to your local computer as the root folder below. There should be a folder for
+# each of the actions below under the videos folder
+
 root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/videos'
 actions = ['boxing', 'handclapping', 'handwaving', 'jogging', 'running', 'walking']
 subsample = 5
@@ -45,7 +49,7 @@ for action in actions:
         if video.shape[0] % 2 != 0: video = video[:-1,:,:]
         action_vids.append(video)  # video, subsampled, evenly spaced
 
-    action_vids = np.vstack(action_vids)  # odd idxes are tm1, even are t
+    action_vids = np.vstack(action_vids)  # consecutive video
 
     # randomly permute  -- don't do this!
     # tm1s = np.random.permutation(range(0,len(action_vids)-1,2))
