@@ -1,6 +1,8 @@
 require 'nn'
 require 'optim'
 
+require 'MotionBCECriterion'
+
 local Encoder = require 'AtariEncoder'
 local Decoder = require 'AtariDecoder'
 
@@ -15,6 +17,7 @@ cmd:option('-import', '', 'initialize network parameters from checkpoint at this
 -- data
 cmd:option('--datasetdir', '/om/user/wwhitney/deep-game-engine', 'dataset source directory')
 cmd:option('--dataset_name', 'dataset_DQN_breakout_trained', 'dataset source directory')
+cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
@@ -30,6 +33,7 @@ cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
+cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
@@ -108,7 +112,7 @@ model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batc
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
-    criterion = nn.BCECriterion()
+    criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")
 end

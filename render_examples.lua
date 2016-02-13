@@ -43,10 +43,11 @@ function getLastSnapshot(network_name)
 end
 
 for _, network in ipairs(networks) do
+    collectgarbage()
     print('')
     print(network)
     local checkpoint = torch.load(paths.concat(base_directory, network, getLastSnapshot(network)))
-    model = checkpoint.model
+    local model = checkpoint.model
     local scheduler_iteration = torch.Tensor{checkpoint.step}
     model:evaluate()
 
@@ -95,10 +96,10 @@ for _, network in ipairs(networks) do
             end
             print("Mean independence of weights: ", weight_norms:mean())
 
-            collectgarbage()
         end
         vis.save_image_grid(paths.concat(output_path, network .."-"..variation..'.png'), images)
     end
+    collectgarbage()
 end
 
 

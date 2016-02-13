@@ -46,8 +46,12 @@ end
 function data_loaders.load_atari_batch(id, mode)
     local data = torch.load(opt.datasetdir .. '/dataset_DQN_' .. opt.dataset_name .. '_trained/' .. mode .. '/images_batch_' .. id)
 
-    local input1s = torch.zeros(29, 3, 210, 160)
-    local input2s = torch.zeros(29, 3, 210, 160)
+    local frame_interval = opt.frame_interval or 1
+
+    local num_inputs = data:size(1) - frame_interval
+
+    local input1s = torch.zeros(num_inputs, 3, 210, 160)
+    local input2s = torch.zeros(num_inputs, 3, 210, 160)
 
     if opt.gpu then
         data = data:cuda()
@@ -55,9 +59,9 @@ function data_loaders.load_atari_batch(id, mode)
     	input2s = input2s:cuda()
     end
 
-    for i = 1, 29 do
+    for i = 1, num_inputs do
         input1s[i] = data[i]
-        input2s[i] = data[i + 1]
+        input2s[i] = data[i + frame_interval]
     end
     return {input1s, input2s}
 end
