@@ -1,6 +1,8 @@
 require 'nn'
 require 'optim'
 
+require 'MotionBCECriterion'
+
 local Encoder = require 'ActionEncoder'
 local Decoder = require 'ActionDecoder'
 
@@ -14,6 +16,7 @@ cmd:option('-import', '', 'initialize network parameters from checkpoint at this
 
 -- data
 cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all', 'dataset source directory')  -- change
+cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
@@ -27,7 +30,7 @@ cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
-cmd:option('--heads', 3, 'how many filtering heads to use')
+cmd:option('--heads', 1, 'how many filtering heads to use')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
@@ -41,11 +44,11 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 10, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 1347, 'every how many iterations should we evaluate on validation data?')
+cmd:option('--eval_val_every', 1347, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
 
 -- data
-cmd:option('--num_train_batches', 1347, 'number of batches to train with per epoch')
-cmd:option('--num_test_batches', 288, 'number of batches to test with')
+cmd:option('--num_train_batches', 1347, 'number of batches to train with per epoch')  -- CHANGE
+cmd:option('--num_test_batches', 288, 'number of batches to test with')  -- CHANGE
 
 -- GPU/CPU
 cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
@@ -106,7 +109,8 @@ model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batc
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
-    criterion = nn.BCECriterion()
+    -- criterion = nn.BCECriterion()
+    criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")
 end
