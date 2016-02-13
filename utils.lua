@@ -193,6 +193,32 @@ function range (i, to, inc)
     return function () if i == to then return nil end i = i + inc return i, i end
 end
 
+-- the elements of t2 should go after their corresponding t1 elements
+function interleave(t1, t2)
+    assert(#t1 == #t2)
+    local interleaved = {}
+    for i = 1, #t1 do
+        interleaved[#interleaved+1] = t1[i]
+        interleaved[#interleaved+1] = t2[i]  -- t2's elements comes after t1
+    end
+    assert(#interleaved %2 == 0)
+    return T.deepcopy(interleaved)
+end
+
+-- extends t1 by the elements of t2
+function extend(t1, t2)
+    local total = T.deepcopy(t1)
+    for i = 1, #t2 do
+        total[#total+1] = t2[i]
+    end
+    assert(#total == #t1 + #t2)
+    return T.deepcopy(total)
+end
+
 -- print(merge_tables_by_value({['a']=1}, {['b'] = 2, ['c'] = 5}))
 
 -- print(intersect({'a','b','c'}, {'d','b','c'}))
+
+-- a = {10,20,30,40,50,60}
+-- print(subrange(a,1,#a-1))
+-- print(a)
