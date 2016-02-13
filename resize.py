@@ -1,6 +1,7 @@
 import os
 from PIL import Image
 from resizeimage import resizeimage
+from progressbar import ProgressBar
 
 def resize(infolder, outfolder, imagefile, size):
     """
@@ -22,10 +23,32 @@ def resize_in_folder(folder,size):
         if not os.path.exists(outfolder): os.mkdir(outfolder)
         resize(folder, outfolder, img, size)
 
-if __name__ == '__main__':
-    root = '/om/data/public/mbchang/udcign-data/kitti/raw/videos/road/'
-    ch = 'image_00'
+def resize_kitti():
+    settings = ['road', 'campus', 'residential', 'city']
+    for setting in settings:
+        root = '/om/data/public/mbchang/udcign-data/kitti/raw/videos/' + setting + '/'
+        ch = 'image_02'  # color
+        size = [150,150]
+        pbar = ProgressBar().start()
+        i = 0
+        for folder in os.listdir(root):
+            img_folder = os.path.join(root, folder + '/' + ch + '/data')
+            resize_in_folder(img_folder, size)
+
+            pbar.update(i + 1)
+            i += 1
+        pbar.finish()
+
+def resize_toyota():
+    root = '/om/data/public/mbchang/udcign-data/toyota/pics'
     size = [150,150]
+    pbar = ProgressBar().start()
+    i = 0
     for folder in os.listdir(root):
-        img_folder = os.path.join(root, folder + '/' + ch + '/data')
-        resize_in_folder(img_folder, size)
+        resize_in_folder(os.path.join(root,folder), size)
+        pbar.update(i + 1)
+        i += 1
+    pbar.finish()
+
+if __name__ == '__main__':
+    resize_toyota()
