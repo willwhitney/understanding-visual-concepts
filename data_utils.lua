@@ -4,7 +4,7 @@ require 'math'
 require 'xlua'
 
 -- train-val-test: 70-15-15 split
-function split_batches(examples, bsize)
+function split_batches(examples)
     local num_test = math.floor(#examples * 0.15)
     local num_val = num_test
     local num_train = #examples - 2*num_test
