@@ -31,7 +31,6 @@ cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
-
 cmd:option('--heads', 1, 'how many filtering heads to use')
 cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
 

@@ -78,9 +78,8 @@ end
 
 
 function data_loaders.load_action_batch(id, mode)
-    local data = torch.load(opt.datasetdir .. '/' .. mode .. '/batch' .. id)
-    data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
-    -- print(data:size())
+    local data = torch.load(opt.datasetdir .. '/' opt.dataset_name ..'/'.. mode .. '/batch' .. id)
+    -- data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
 
     local input1s = torch.zeros(29, 1, 120, 160)
     local input2s = torch.zeros(29, 1, 120, 160)
@@ -98,26 +97,6 @@ function data_loaders.load_action_batch(id, mode)
     return {input1s, input2s}
 end
 
--- function data_loaders.load_action_batch(id, mode)
---     local data = torch.load(opt.datasetdir .. '/' .. mode .. '/batch' .. id)
---     data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
---     -- print(data:size())
---
---     local input1s = torch.zeros(15, 1, 120, 160)
---     local input2s = torch.zeros(15, 1, 120, 160)
---
---     if opt.gpu then
---         data = data:cuda()
---     	input1s = input1s:cuda()
---     	input2s = input2s:cuda()
---     end
---
---     for i = 1, 15 do
---         input1s[i] = data[2*i-1]
---         input2s[i] = data[2*i]
---     end
---     return {input1s, input2s}
--- end
 
 function data_loaders.load_random_action_batch(mode)
     local id
@@ -130,35 +109,35 @@ function data_loaders.load_random_action_batch(mode)
 end
 
 
-function data_loaders.load_kitti_batch(id, mode)
-    local data = torch.load(opt.datasetdir .. '/' .. mode .. '/batch' .. id)
-    -- data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
-    print(data:size())
-
-    local input1s = torch.zeros(29, 1, 150, 150)
-    local input2s = torch.zeros(29, 1, 150, 150)
-
-    if opt.gpu then
-        data = data:cuda()
-    	input1s = input1s:cuda()
-    	input2s = input2s:cuda()
-    end
-
-    for i = 1, 29 do
-        input1s[i] = data[i]
-        input2s[i] = data[i + 1]
-    end
-    return {input1s, input2s}
-end
-
-function data_loaders.load_random_kitti_batch(mode)
-    local id
-    if mode == 'train' then
-        id = math.random(opt.num_train_batches)
-    elseif mode == 'test' then
-        id = math.random(opt.num_train_batches)
-    end
-    return data_loaders.load_kitti_batch(id, mode)
-end
+-- function data_loaders.load_kitti_batch(id, mode)
+--     local data = torch.load(opt.datasetdir .. '/' .. mode .. '/batch' .. id)
+--     -- data = data:reshape(data:size(1),1,data:size(2),data:size(3))  -- one channel
+--     print(data:size())
+--
+--     local input1s = torch.zeros(29, 1, 150, 150)
+--     local input2s = torch.zeros(29, 1, 150, 150)
+--
+--     if opt.gpu then
+--         data = data:cuda()
+--     	input1s = input1s:cuda()
+--     	input2s = input2s:cuda()
+--     end
+--
+--     for i = 1, 29 do
+--         input1s[i] = data[i]
+--         input2s[i] = data[i + 1]
+--     end
+--     return {input1s, input2s}
+-- end
+--
+-- function data_loaders.load_random_kitti_batch(mode)
+--     local id
+--     if mode == 'train' then
+--         id = math.random(opt.num_train_batches)
+--     elseif mode == 'test' then
+--         id = math.random(opt.num_train_batches)
+--     end
+--     return data_loaders.load_kitti_batch(id, mode)
+-- end
 
 return data_loaders

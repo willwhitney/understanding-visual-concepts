@@ -57,7 +57,7 @@ local KITTIEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     heads[1]:add(nn.AddConstant(1e-20))
     heads[1]:add(nn.Normalize(1, 1e-100))
 
-    for i = 2, num_heads do
+    for i = 2, num_heads do  -- won't execute if num_heads < 2
         heads[i] = heads[1]:clone()
     end
 

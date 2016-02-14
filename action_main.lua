@@ -15,7 +15,8 @@ cmd:option('--checkpoint_dir', 'logslink', 'output directory where checkpoints g
 cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
 -- data
-cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action/all', 'dataset source directory')  -- change
+cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action', 'dataset source directory')  -- change
+cmd:option('--dataset_name', 'running', 'dataset source directory')
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
@@ -31,6 +32,7 @@ cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
+cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
