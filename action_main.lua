@@ -53,13 +53,26 @@ cmd:option('--num_train_batches', 1347, 'number of batches to train with per epo
 cmd:option('--num_test_batches', 288, 'number of batches to test with')  -- CHANGE
 
 -- GPU/CPU
-cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
+cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
 cmd:text()
 
 
 -- parse input params
 opt = cmd:parse(arg)
 torch.manualSeed(opt.seed)
+
+local dsizes = {walking={num_train_batches=1347,num_test_batches=288},
+                running={num_train_batches=860,num_test_batches=183},
+                jogging={num_train_batches=985,num_test_batches=210},
+                handclapping={num_train_batches=957,num_test_batches=205},
+                handwaving={num_train_batches=1216,num_test_batches=260},
+                boxing={num_train_batches=1015,num_test_batches=217}}
+opt.num_train_batches = dsizes[opt.dataset_name].num_train_batches
+opt.num_test_batches = dsizes[opt.dataset_name].num_test_batches
+opt.eval_val_every = opt.num_train_batches
+
+print(opt)
+print(opt.gpu)
 
 if opt.gpu then
     require 'cutorch'

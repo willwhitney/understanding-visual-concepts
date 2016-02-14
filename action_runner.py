@@ -35,23 +35,25 @@ jobs = []
 
 noise_options = [0.1]
 sharpening_rate_options = [5]
-learning_rate_options = [20e-5,30e-5,35e-5,40e-5]
-heads_options = [3]
+learning_rate_options = [10e-5, 20e-5, 30e-5]
+heads_options = [1]
+dataset_name_options = ['walking']
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 for noise in noise_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
             for heads in heads_options:
-                job = {
-                        "noise": noise,
-                        "sharpening_rate": sharpening_rate,
-                        "learning_rate": learning_rate,
-                        "heads": heads,
-                        # "dataset_name": "space_invaders",
-                        # "gpu": True,
-                    }
-                jobs.append(job)
+                for dataset_name in dataset_name_options:
+                    job = {
+                            "noise": noise,
+                            "sharpening_rate": sharpening_rate,
+                            "learning_rate": learning_rate,
+                            "heads": heads,
+                            "dataset_name": dataset_name
+                            # "gpu": True,
+                        }
+                    jobs.append(job)
 
 
 if dry_run:
