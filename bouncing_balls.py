@@ -163,8 +163,9 @@ if __name__ == "__main__":
     mode = 'val'
     # root = '/om/data/public/mbchang/udcign-data/balls'
     root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/balls'
-    num_balls = 1
+    num_balls = 6
     batch_size = 30
     image_size = 150
+    print mode, num_balls
     # TODO add subsample!
     make_dataset(root, mode, datasets[mode], num_balls, batch_size, image_size)

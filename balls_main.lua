@@ -41,7 +41,7 @@ cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 
-cmd:option('--max_epochs', 20, 'number of full passes through the training data')
+cmd:option('--max_epochs', 50, 'number of full passes through the training data')
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')

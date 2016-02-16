@@ -69,7 +69,7 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     if num_heads > 1 then
         -- combine the distributions from all heads
         local dist_adder = nn.CAddTable()(heads)
-        local dist_clamp = nn.Clamp(0, 1)(dist_adder)
+        local dist_clamp = nn.Clamp(0, 1)(dist_adder)  -- TODO is clamp the right way to go about it?
         dist = dist_clamp
     else
         dist = heads[1]
