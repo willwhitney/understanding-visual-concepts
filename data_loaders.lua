@@ -3,7 +3,6 @@ require 'image'
 local data_loaders = {}
 
 opt = {}
--- opt.datasetdir = '../data/udcign/balls'
 
 function data_loaders.load_mv_batch(id, dataset_name, mode)
     local data = torch.load(opt.datasetdir .. '/th_' .. dataset_name .. '/' .. mode .. '/batch' .. id)
@@ -76,7 +75,7 @@ function data_loaders.load_random_atari_batch(mode)
     if mode == 'train' then
         id = math.random(opt.num_train_batches)
     elseif mode == 'test' then
-        id = math.random(opt.num_train_batches)
+        id = math.random(opt.num_test_batches)
     end
     return data_loaders.load_atari_batch(id, mode)
 end
@@ -107,7 +106,7 @@ function data_loaders.load_random_action_batch(mode)
     if mode == 'train' then
         id = math.random(opt.num_train_batches)
     elseif mode == 'test' then
-        id = math.random(opt.num_train_batches)
+        id = math.random(opt.num_test_batches)
     end
     return data_loaders.load_action_batch(id, mode)
 end
@@ -117,14 +116,13 @@ end
 function data_loaders.load_balls_batch(id, mode)
     local adjusted_id = id-1  -- adjust from python indexing
     local batch_folder = opt.datasetdir .. '/' .. mode .. '_nb='..opt.numballs..'_bsize=30_imsize=150/batch' ..adjusted_id
-    -- local data = torch.load(opt.datasetdir .. '/' .. opt.dataset_name ..'/'.. mode .. '/batch' .. id)
 
     -- now open and sort the images. images go from 0 to 29
     local data = torch.zeros(30,1,150,150)
-    for i = 0,29 do
+    for i = 0,29 do  -- because of python indexing
         local img = image.load(batch_folder ..'/' .. i ..'.png')
         img = img/255
-        data[i+1] = img--.reshape(150,150,1)
+        data[i+1] = img
     end
 
     local input1s = torch.zeros(29, 1, 150, 150)
@@ -149,7 +147,7 @@ function data_loaders.load_random_balls_batch(mode)
     if mode == 'train' then
         id = math.random(opt.num_train_batches)
     elseif mode == 'test' then
-        id = math.random(opt.num_train_batches)
+        id = math.random(opt.num_test_batches)
     end
     return data_loaders.load_balls_batch(id, mode)  -- becuase I saved it as python indexing
 end
@@ -187,5 +185,3 @@ end
 -- end
 
 return data_loaders
-
--- data_loaders.load_balls_batch(1,'train')
