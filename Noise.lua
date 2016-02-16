@@ -19,7 +19,6 @@ function Noise:updateOutput(input)
 
         self.output = input + noise
     else
-        print("Noise inactive!")
         self.output = input
     end
     return self.output
