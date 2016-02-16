@@ -31,8 +31,8 @@ jobs = []
 
 noise_options = [0.1]
 sharpening_rate_options = [8]
-learning_rate_options = [1e-4, 3e-4]
-heads_options = [3]
+learning_rate_options = [3e-4]
+heads_options = [1]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 for noise in noise_options:
@@ -45,6 +45,7 @@ for noise in noise_options:
                         "learning_rate": learning_rate,
                         "heads": heads,
 
+                        "dual_objectives": True,
 
                         "gpu": True,
                     }

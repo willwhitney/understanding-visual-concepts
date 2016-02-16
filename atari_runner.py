@@ -33,8 +33,8 @@ noise_options = [0.1]
 sharpening_rate_options = [10]
 learning_rate_options = [2e-4]
 heads_options = [1, 3]
-motion_scale_options = [3, 10]
-frame_interval_options = [3, 10]
+motion_scale_options = [3]
+frame_interval_options = [3]
 dataset_name_options = ["breakout", "space_invaders"]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
@@ -53,6 +53,8 @@ for noise in noise_options:
                                     "motion_scale": motion_scale,
                                     "frame_interval": frame_interval,
                                     "dataset_name": dataset_name,
+
+                                    "dual_objectives": True,
                                     "gpu": True,
                                 }
                             jobs.append(job)
