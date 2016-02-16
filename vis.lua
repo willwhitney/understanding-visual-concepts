@@ -89,9 +89,13 @@ function vis.round(tensor, places)
     return tensorClone
 end
 
-function vis.simplestr(tensor)
-    -- local rounded = vis.round(tensor)
-    -- -- local rounded = tensor:clone()
+function vis.simplestr(input)
+    if type(input) == 'number' then
+        local str = string.format("%." .. vis.decimalPlaces .. "f", input)
+        return str
+    end
+    -- local rounded = vis.round(input)
+    -- -- local rounded = input:clone()
     --
     -- local strTable = vis.lines(tostring(vis.flatten(rounded)))
     -- table.remove(strTable, #strTable)
@@ -102,12 +106,12 @@ function vis.simplestr(tensor)
     --     str = str..line
     -- end
     -- return str
-    -- print("tensor", tensor)
-    -- print("tensor1", tensor[1])
-    -- print(tensor)
-    local str = string.format("%." .. vis.decimalPlaces .. "f", tensor[1])
-    for i = 2, tensor:size(1) do
-        str = str .. string.format(" %." .. vis.decimalPlaces .. "f", tensor[i])
+    -- print("input", input)
+    -- print("tensor1", input[1])
+    -- print(input)
+    local str = string.format("%." .. vis.decimalPlaces .. "f", input[1])
+    for i = 2, input:size(1) do
+        str = str .. string.format(" %." .. vis.decimalPlaces .. "f", input[i])
     end
     return str
 end
