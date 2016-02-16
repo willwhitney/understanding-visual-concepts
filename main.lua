@@ -28,6 +28,7 @@ cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
+cmd:option('--dual_objectives', false, 'use straight reconstruction as well as sparse transform as objective')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 96, 'number of feature maps')
@@ -105,8 +106,13 @@ local scheduler_iteration = torch.zeros(1)
 -- graph.dot(encoder.fg, 'encoder', 'encoder')
 
 local model = nn.Sequential()
-model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
-model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
+local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads)
+local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm)
+model:add(encoder)
+model:add(decoder)
+
+local encoder1 = encoder:findModules('nn.Linear')[1]
+local encoder2 = encoder:findModules('nn.Linear')[2]
 
 
 if opt.criterion == 'MSE' then
@@ -162,13 +168,43 @@ function feval(x)
     model:training() -- make sure we are in correct mode
 
 
-    output = model:forward(input)
+    local loss
+    if not opt.dual_objectives then
+        local output = model:forward(input)
 
-    loss = criterion:forward(output, input[2])
-    grad_output = criterion:backward(output, input[2]):clone()
+        loss = criterion:forward(output, input[2])
+        local grad_output = criterion:backward(output, input[2]):clone()
 
-    ------------------ backward pass -------------------
-    model:backward(input, grad_output)
+        model:backward(input, grad_output)
+    else
+        -- to weight straight reconstruction and sparse reconstruction equally,
+        -- divide the gradients from sparse reconstruction by 2
+        -- and the gradients from both straight reconstructions by 4
+
+        -- sparse reconstruction first
+        local output = model:forward(input)
+
+        loss = criterion:forward(output, input[2]) / 2
+        local grad_output = criterion:backward(output, input[2]):clone() / 2
+
+        model:backward(input, grad_output)
+
+        -- reuse the outputs of the encoders, since they're the same
+        local input1_recon = decoder:forward(encoder1.output)
+        loss = loss + criterion:forward(input1_recon, input[1]) / 4
+        local grad_output1 = criterion:backward(input1_recon, input[1]) / 4
+
+        local grad_encoding1 = decoder:backward(encoder1.output, grad_output1)
+        encoder1:backward(input[1], grad_encoding1)
+
+
+        local input2_recon = decoder:forward(encoder2.output)
+        loss = loss + criterion:forward(input2_recon, input[2]) / 4
+        local grad_output2 = criterion:backward(input2_recon, input[2]) / 4
+
+        local grad_encoding2 = decoder:backward(encoder2.output, grad_output2)
+        encoder2:backward(input[2], grad_encoding2)
+    end
 
 
     ------------------ regularize -------------------
