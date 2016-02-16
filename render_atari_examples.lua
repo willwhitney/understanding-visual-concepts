@@ -83,6 +83,13 @@ for _, network in ipairs(networks) do
             local reconstruction_from_current = decoder:forward(embedding_from_current):clone()
 
             local weight_norms = torch.zeros(output:size(1))
+            local weight_norms = torch.zeros(output:size(1))
+            for input_index = 1, output:size(1) do
+                weights = weight_predictor.output[input_index]:clone()
+                weight_norms[input_index] = weights:norm()
+            end
+            print("Mean independence of weights: ", weight_norms:mean())
+
             for input_index = 1, math.min(30, output:size(1)), 3 do
                 local weights = weight_predictor.output[input_index]:clone()
                 local max_weight, varying_index = weights:max(1)
@@ -93,7 +100,6 @@ for _, network in ipairs(networks) do
                 -- print("Independence of embedding change: ", normalized_embedding_change:norm())
                 -- print("Distance between timesteps: ", embedding_change:norm())
 
-                weight_norms[input_index] = weights:norm()
 
                 local image_row = {}
                 table.insert(image_row, input[1][input_index]:float())
@@ -103,7 +109,6 @@ for _, network in ipairs(networks) do
                 table.insert(image_row, output[input_index]:float())
                 table.insert(images, image_row)
             end
-            print("Mean independence of weights: ", weight_norms:mean())
             vis.save_image_grid(paths.concat(output_path, network .. '_batch_'..i..'.png'), images)
 
             collectgarbage()
