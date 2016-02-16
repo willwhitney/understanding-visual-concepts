@@ -41,7 +41,7 @@ cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 
-cmd:option('--max_epochs', 50, 'number of full passes through the training data')
+cmd:option('--max_epochs', 100, 'number of full passes through the training data')
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
@@ -53,7 +53,7 @@ cmd:option('--num_train_batches', 1347, 'number of batches to train with per epo
 cmd:option('--num_test_batches', 288, 'number of batches to test with')  -- CHANGE
 
 -- GPU/CPU
-cmd:option('--gpu', false, 'which gpu to use. -1 = use CPU')
+cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
 cmd:text()
 
 
