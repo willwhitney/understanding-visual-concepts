@@ -70,11 +70,12 @@ for _, network in ipairs(networks) do
         -- local current_embedding = encoder:findModules('nn.Linear')[2]
         local decoder = model.modules[2]
 
-        for batch_index = 342, 342 do
+        for _, batch_index in ipairs{347, 400, 420} do
+            print("Batch index: ", batch_index)
             -- local images = {}
 
             -- fetch a batch
-            local input = data_loaders.load_atari_batch(batch_index, 'train')
+            local input = data_loaders.load_atari_batch(batch_index, 'test')
             local output = model:forward(input):clone()
             local embedding_from_previous = previous_embedding.output:clone()
             -- local embedding_from_current = current_embedding.output:clone()
@@ -89,37 +90,81 @@ for _, network in ipairs(networks) do
             end
             print("Mean independence of weights: ", weight_norms:mean())
 
-            local max_indices = {}
-            for input_index = 1, output:size(1) do
-                local weights = weight_predictor.output[input_index]:clone()
-                local _, idx = weights:max(1)
-                max_indices[idx] = true
-            end
 
-            for input_index = 2, 2 do
-                local base_embedding = embedding_from_previous[batch_index]:clone()
-                for _, max_index in ipairs(max_indices) do
+
+
+            -- local max_indices = {}
+            -- for input_index = 1, output:size(1) do
+            --     local weights = weight_predictor.output[input_index]:clone()
+            --     local _, idx = weights:max(1)
+            --     max_indices[idx[1]] = true
+            -- end
+
+            for input_index = 1, 2 do
+                collectgarbage()
+                print("Input index: ", input_index)
+                local base_embedding = embedding_from_previous[input_index]:clone():float()
+
+                local weights = weight_predictor.output[input_index]:clone():float()
+                local max_indices = {}
+                for nth_max = 1, 3 do
+                    local _, idx = weights:max(1)
+                    idx = idx[1]
+                    max_indices[idx] = true
+                    weights[idx] = 0
+                end
+
+
+                for max_index, _ in pairs(max_indices) do
+                    collectgarbage()
                     -- local weights = weight_predictor.output[input_index]:clone()
                     -- local max_weight, varying_index = weights:max(1)
 
-                    local i = 0
-                    for change = -4, 1.5, 0.05 do
-                        local output_directory = paths.concat(
+                    local num_frames = 40
+                    local min_change = -1.5
+                    local max_change = 1.5
+
+                    local mutated_input = torch.Tensor(num_frames, base_embedding:size(1))
+
+                    for i = 1, num_frames do
+                        local change = min_change + (i-1) * (max_change-min_change)/num_frames
+                        mutated_input[i] = base_embedding:clone()
+                        mutated_input[i][max_index] = mutated_input[i][max_index] + change
+                    end
+
+                    local mutated_renders = decoder:forward(mutated_input:cuda()):clone()
+
+                    local output_directory = paths.concat(
                             output_path,
                             network,
                             'batch_'..batch_index..'_input_'..input_index..'_along_'..max_index)
+                    os.execute('mkdir -p '..output_directory)
+
+                    for i = 1, num_frames do
+                        local change = min_change + (i-1) * (max_change-min_change)/num_frames
                         local output_filename = paths.concat(
                             output_directory,
-                            'changing_'..i..'_amount_'..change..'.png')
-                        os.execute('mkdir -p '..output_directory)
-
-                        local changed_embedding = base_embedding:clone()
-                        changed_embedding[max_index] = changed_embedding[max_index] + change
-
-                        local rendering = decoder:forward(changed_embedding:reshape(1, 200))[1]:clone()
-                        image.save(output_filename, rendering:float())
-                        i = i + 1
+                            'changing_'..i..'_amount_'..vis.simplestr(change)..'.png')
+                        image.save(output_filename, mutated_renders[i])
                     end
+
+                    -- for change = -3, 3, 0.1 do
+                    --     local output_directory = paths.concat(
+                    --         output_path,
+                    --         network,
+                    --         'batch_'..batch_index..'_input_'..input_index..'_along_'..max_index)
+                    --     local output_filename = paths.concat(
+                    --         output_directory,
+                    --         'changing_'..i..'_amount_'..vis.simplestr(change)..'.png')
+                    --     os.execute('mkdir -p '..output_directory)
+
+                    --     local changed_embedding = base_embedding:clone()
+                    --     changed_embedding[max_index] = changed_embedding[max_index] + change
+
+                    --     local rendering = decoder:forward(changed_embedding:reshape(1, 200))[1]:clone()
+                    --     image.save(output_filename, rendering:float())
+                    --     i = i + 1
+                    -- end
 
                     -- weight_norms[input_index] = weights:norm()
 
@@ -130,12 +175,13 @@ for _, network in ipairs(networks) do
                     -- table.insert(image_row, reconstruction_from_current[input_index]:float())
                     -- table.insert(image_row, output[input_index]:float())
                     -- table.insert(images, image_row)
+                    collectgarbage()
                 end
             end
             -- print("Mean independence of weights: ", weight_norms:mean())
             -- vis.save_image_grid(paths.concat(output_path, network .. '_batch_'..batch_index..'.png'), images)
 
-            collectgarbage()
+
         end
     end
 end

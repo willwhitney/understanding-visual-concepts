@@ -74,7 +74,7 @@ for _, network in ipairs(networks) do
             local images = {}
 
             -- fetch a batch
-            local input = data_loaders.load_atari_batch(i, 'train')
+            local input = data_loaders.load_atari_batch(i, 'test')
             local output = model:forward(input):clone()
             local embedding_from_previous = previous_embedding.output:clone()
             local embedding_from_current = current_embedding.output:clone()
