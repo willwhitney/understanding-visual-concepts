@@ -9,8 +9,7 @@ require 'BallsEncoder'
 require 'Decoder'
 local data_loaders = require 'data_loaders'
 
-name = arg[1]
--- name = 'balls_learning_rate_0.0003_noise_0.1_heads_3_numballs_3_sharpening_rate_5'--arg[1]
+name = 'balls' --arg[1]
 -- dataset_name = arg[2] or name
 networks = {}
 while true do
@@ -24,7 +23,6 @@ while true do
         table.insert(networks, line)
     end
 end
--- networks = {name}
 
 -- opt = {
 --         datasetdir = '/om/user/wwhitney/deep-game-engine',
@@ -96,11 +94,11 @@ for _, network in ipairs(networks) do
             weight_norms[input_index] = weights:norm()
 
             local image_row = {}
-            table.insert(image_row, input[1][input_index]:float()*255)
-            table.insert(image_row, input[2][input_index]:float()*255)
-            table.insert(image_row, reconstruction_from_previous[input_index]:float()*255)
-            table.insert(image_row, reconstruction_from_current[input_index]:float()*255)
-            table.insert(image_row, output[input_index]:float()*255)
+            table.insert(image_row, input[1][input_index]:float())
+            table.insert(image_row, input[2][input_index]:float())
+            table.insert(image_row, reconstruction_from_previous[input_index]:float())
+            table.insert(image_row, reconstruction_from_current[input_index]:float())
+            table.insert(image_row, output[input_index]:float())
             table.insert(images, image_row)
         end
         print("Mean independence of weights: ", weight_norms:mean())

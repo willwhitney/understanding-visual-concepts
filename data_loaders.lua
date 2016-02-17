@@ -121,7 +121,7 @@ function data_loaders.load_balls_batch(id, mode)
     local data = torch.zeros(30,1,150,150)
     for i = 0,29 do  -- because of python indexing
         local img = image.load(batch_folder ..'/' .. i ..'.png')
-        img = img/255
+        -- img = img/255 --
         data[i+1] = img
     end
 
