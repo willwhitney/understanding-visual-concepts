@@ -66,7 +66,7 @@ for _, network in ipairs(networks) do
     local decoder = model.modules[2]
 
     local images = {}
-    for i = 1, 1 do -- for now only render one batch
+    for i = 100, 100 do -- for now only render one batch
         -- fetch a batch
         local input = data_loaders.load_action_batch(i, 'test')
         local output = model:forward(input):clone()
