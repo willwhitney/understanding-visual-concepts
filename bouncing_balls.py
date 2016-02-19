@@ -3,6 +3,7 @@ import pdb
 import os
 import cv2
 from progressbar import ProgressBar
+from argparse import ArgumentParser
 
 # Adapted from Ruben Villegas, U Mich
 
@@ -142,30 +143,51 @@ class BouncingBallDataHandler(object):
                                            seq.shape[1],seq.shape[2] )
         return seq_batch.astype('float32')
 
-def make_dataset(root, mode, num_batches, num_balls, batch_size, image_size=150):
+def make_dataset(root, mode, num_batches, num_balls, batch_size, image_size, subsample):
     """ Each sequence is a batch """
-    handler = BouncingBallDataHandler(num_balls=num_balls, seq_length=batch_size, batch_size=1, image_size=150)
-    data_root = os.path.join(root, mode) + '_nb=' + str(num_balls) + '_bsize=' + str(batch_size) + '_imsize=' + str(image_size)
+    handler = BouncingBallDataHandler(num_balls=num_balls, seq_length=batch_size*subsample, batch_size=1, image_size=150)
+    data_root = os.path.join(root, mode) + '_nb=' + str(num_balls) + '_bsize=' + str(batch_size) + '_imsize=' + str(image_size) + '_subsamp=' + str(subsample)
     os.mkdir(data_root)
     pbar = ProgressBar()
     for i in pbar(range(num_batches)):
         batch_folder = os.path.join(data_root,'batch'+str(i))
         os.mkdir(batch_folder)
         x = handler.GetBatch()  # this is normalized between 0 and 1
-        for j in range(batch_size):
-            cv2.imwrite(os.path.join(batch_folder,str(j)+'.png'),x[j,0,:,:]*255)
+        for j in range(0,batch_size*subsample,subsample):
+            # pass
+            cv2.imwrite(os.path.join(batch_folder,str(j/subsample)+'.png'),x[j,0,:,:]*255)
     pbar.finish()
 
 if __name__ == "__main__":
+
     # handler = BouncingBallDataHandler(num_balls=3, seq_length=30, batch_size=1, image_size=150)
     # x = handler.GetBatch()
+
+    parser = ArgumentParser()
+    parser.add_argument('-m','--mode', type=str, default='train',
+       help='train | test | val')
+    parser.add_argument('-b','--batch_size', type=int, default=30,
+       help='batch size')
+    parser.add_argument('-n','--num_balls', type=int, default=3,
+       help='Number of balls')
+    parser.add_argument('-s','--subsample', type=int, default=3,
+       help='How many frames to subample')
+    parser.add_argument('-i','--image_size', type=int, default=150,
+       help='Dimension of square image')
+    # parser.add_argument('-e','--name', type=str, default='defaultballsname',
+    #    help='name of job')
+    args = parser.parse_args()
+
+    root = '/om/data/public/mbchang/udcign-data/balls'
+    # root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/balls'
     datasets = {'train':9000,'test':1000,'val':1000}
-    mode = 'val'
-    # root = '/om/data/public/mbchang/udcign-data/balls'
-    root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/balls'
-    num_balls = 6
-    batch_size = 30
-    image_size = 150
+
+    mode = args.mode #'val'
+    num_balls = args.num_balls#6
+    batch_size = args.batch_size#30
+    image_size = args.image_size#150
+    subsample = args.subsample#5
     print mode, num_balls
+    print(args)
     # TODO add subsample!
-    make_dataset(root, mode, datasets[mode], num_balls, batch_size, image_size)
+    make_dataset(root, mode, datasets[mode], num_balls, batch_size, image_size, subsample)
