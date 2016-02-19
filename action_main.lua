@@ -16,7 +16,7 @@ cmd:option('-import', '', 'initialize network parameters from checkpoint at this
 
 -- data
 cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action', 'dataset source directory')  -- change
-cmd:option('--dataset_name', 'running', 'dataset source directory')
+cmd:option('--dataset_name', 'allactions', 'dataset source directory')
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
@@ -32,7 +32,7 @@ cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
-cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
+cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
@@ -46,11 +46,11 @@ cmd:option('--max_epochs', 100, 'number of full passes through the training data
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 10, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 1347, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
+cmd:option('--eval_val_every', 1395, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
 
 -- data
-cmd:option('--num_train_batches', 1347, 'number of batches to train with per epoch')  -- CHANGE
-cmd:option('--num_test_batches', 288, 'number of batches to test with')  -- CHANGE
+cmd:option('--num_train_batches', 6527, 'number of batches to train with per epoch')  -- CHANGE
+cmd:option('--num_test_batches', 1395, 'number of batches to test with')  -- CHANGE
 
 -- GPU/CPU
 cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
@@ -66,7 +66,8 @@ local dsizes = {walking={num_train_batches=1347,num_test_batches=288},
                 jogging={num_train_batches=985,num_test_batches=210},
                 handclapping={num_train_batches=957,num_test_batches=205},
                 handwaving={num_train_batches=1216,num_test_batches=260},
-                boxing={num_train_batches=1015,num_test_batches=217}}
+                boxing={num_train_batches=1015,num_test_batches=217},
+                alldata={num_train_batches=6527,num_test_batches=1395}}
 opt.num_train_batches = dsizes[opt.dataset_name].num_train_batches
 opt.num_test_batches = dsizes[opt.dataset_name].num_test_batches
 opt.eval_val_every = opt.num_train_batches
@@ -124,7 +125,7 @@ model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batc
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
-    -- criterion = nn.BCECriterion()
+    --criterion = nn.BCECriterion()
     criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")

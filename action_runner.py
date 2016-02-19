@@ -5,7 +5,7 @@ dry_run = '--dry-run' in sys.argv
 local   = '--local' in sys.argv
 detach  = '--detach' in sys.argv
 
-dry_run = True
+dry_run = False
 local = False
 detach = True
 
@@ -33,27 +33,30 @@ base_networks = {
 
 jobs = []
 
-noise_options = [0.1]
-sharpening_rate_options = [5]
-learning_rate_options = [10e-5, 20e-5, 30e-5]
+# noise_options = [0.1]
+# sharpening_rate_options = [10]
+learning_rate_options = [30e-5, 40e-5, 50e-5, 60e-5, 70e-5]
+# motion_scale_options = [3]
 heads_options = [1]
-dataset_name_options = ['walking']
+dataset_name_options = ['allactions']
 # L2_options = [1e-2, 1e-3, 1e-4]
 
-for noise in noise_options:
-    for sharpening_rate in sharpening_rate_options:
-        for learning_rate in learning_rate_options:
-            for heads in heads_options:
-                for dataset_name in dataset_name_options:
-                    job = {
-                            "noise": noise,
-                            "sharpening_rate": sharpening_rate,
-                            "learning_rate": learning_rate,
-                            "heads": heads,
-                            "dataset_name": dataset_name
-                            # "gpu": True,
-                        }
-                    jobs.append(job)
+# for noise in noise_options:
+    # for sharpening_rate in sharpening_rate_options:
+for learning_rate in learning_rate_options:
+    for heads in heads_options:
+        for dataset_name in dataset_name_options:
+            # for motion_scale in motion_scale_options:
+            job = {
+                    # "noise": noise,
+                    # "sharpening_rate": sharpening_rate,
+                    "learning_rate": learning_rate,
+                    "heads": heads,
+                    "dataset_name": dataset_name,
+                    # "motion_scale": motion_scale
+                    # "gpu": True,
+                }
+            jobs.append(job)
 
 
 if dry_run:

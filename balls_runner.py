@@ -33,27 +33,30 @@ base_networks = {
 
 jobs = []
 
-noise_options = [0.1]
-sharpening_rate_options = [5]
-learning_rate_options = [10e-5, 30e-5]
-heads_options = [1]
-numballs_options = [3]
+# noise_options = [0.1]
+# sharpening_rate_options = [10]
+learning_rate_options = [40e-5, 50e-5]
+heads_options = [1,2,3]
+numballs_options = [2,3]
+subsamp_options = [3]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
-for noise in noise_options:
-    for sharpening_rate in sharpening_rate_options:
-        for learning_rate in learning_rate_options:
-            for heads in heads_options:
-                for numballs in numballs_options:
-                    job = {
-                                "noise": noise,
-                                "sharpening_rate": sharpening_rate,
-                                "learning_rate": learning_rate,
-                                "heads": heads,
-                                "numballs": numballs
-                                # "dataset_name": dataset_name
-                                # "gpu": True,
-                            }
+# for noise in noise_options:
+# for sharpening_rate in sharpening_rate_options:
+for learning_rate in learning_rate_options:
+    for numballs in numballs_options:
+        for heads in heads_options:
+            for subsamp in subsamp_options:
+                job = {
+                            # "noise": noise,
+                            # "sharpening_rate": sharpening_rate,
+                            "learning_rate": learning_rate,
+                            "heads": heads,
+                            "numballs": numballs,
+                            "subsample":subsamp
+                            # "dataset_name": dataset_name
+                            # "gpu": True,
+                        }
                 jobs.append(job)
 
 

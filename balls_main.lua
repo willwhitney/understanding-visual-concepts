@@ -17,10 +17,11 @@ cmd:option('-import', '', 'initialize network parameters from checkpoint at this
 -- data
 cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/balls', 'dataset source directory')  -- change
 cmd:option('--numballs', 1, 'dataset source directory')
+cmd:option('--subsample', 3, 'subsample')  -- hard code this into data_loader
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
-cmd:option('--learning_rate', 1e-4, 'learning rate')
+cmd:option('--learning_rate', 30e-5, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
 cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to start decaying the learning rate')
 cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
@@ -32,7 +33,7 @@ cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
-cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
+cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
