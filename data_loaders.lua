@@ -115,7 +115,12 @@ end
 
 function data_loaders.load_balls_batch(id, mode)
     local adjusted_id = id-1  -- adjust from python indexing
-    local batch_folder = opt.datasetdir .. '/' .. mode .. '_nb='..opt.numballs..'_bsize=30_imsize=150/batch' ..adjusted_id
+    local batch_folder
+    if opt.subsample then
+        batch_folder = opt.datasetdir .. '/' .. mode .. '_nb='..opt.numballs..'_bsize=30_imsize=150_subsamp='..opt.subsample..'/batch' ..adjusted_id
+    else
+        batch_folder = opt.datasetdir .. '/' .. mode .. '_nb='..opt.numballs..'_bsize=30_imsize=150/batch' ..adjusted_id
+    end
 
     -- now open and sort the images. images go from 0 to 29
     local data = torch.zeros(30,1,150,150)
