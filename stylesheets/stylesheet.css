@@ -243,3 +243,19 @@ a {
 @media screen and (max-width: 42em) {
   .site-footer {
     font-size: 0.9rem; } }
+
+.image-row {
+    display: flex;
+    margin: -1em 2em 0 1em;
+
+    width: 100%;
+}
+
+.image-row img {
+    display: block;
+}
+
+.image-wrapper {
+    flex: 1;
+    padding: 1em 0 0 1em;
+}
