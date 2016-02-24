@@ -60,7 +60,7 @@ function save_batches(datasets, savefolder, idxs)
             -- xlua.progress(idxs[dname], #data)
             local batchname = paths.concat(subfolder, 'batch'..idxs[dname])
             print(dname..': '..batchname)
-            torch.save(batchname, b)
+            torch.save(batchname, b:float())
             idxs[dname] = idxs[dname] + 1
         end
     end
@@ -68,15 +68,17 @@ function save_batches(datasets, savefolder, idxs)
 end
 
 function main_all()
+    local scenario = 'd4'
     local actions = {'running', 'jogging', 'walking', 'handclapping', 'handwaving', 'boxing'}
     local dataset_folder = '/om/data/public/mbchang/udcign-data/action/raw/hdf5'
-    local to_save_folder = '/om/data/public/mbchang/udcign-data/action/allactions'
+    local to_save_folder = '/om/data/public/mbchang/udcign-data/action/allactions'..scenario
+    if not paths.dirp(to_save_folder) then paths.mkdir(to_save_folder) end
     local bsize = 30
     local idxs = {train=1,val=1,test=1}  -- train, val, test
     print(idxs)
 
     for _,action in pairs(actions) do
-        local dataset_name = action .. '_subsamp=1.h5'
+        local dataset_name = action .. '_subsamp=1_scenario=d4.h5'
         print('dataset:'..dataset_name)
         print('to save:'..to_save_folder)
 

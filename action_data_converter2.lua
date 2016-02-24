@@ -64,8 +64,7 @@ function save_batches(datasets, savefolder)
             xlua.progress(i, #data)
             b = b:float()
             local batchname = paths.concat(subfolder, 'batch'..i)
-            -- print(batchname)
-            torch.save(batchname, b)
+            -- torch.save(batchname, b)
             i = i + 1
         end
     end
@@ -77,8 +76,9 @@ function main()
     local bsize = 30
 
     for _,action in pairs(actions) do
-        local dataset_name = action .. '_subsamp=1.h5'
-        local to_save_folder = '/om/data/public/mbchang/udcign-data/action/'..action
+        local dataset_name = action .. '_subsamp=1_scenario=d4.h5'
+        local to_save_folder = '/om/data/public/mbchang/udcign-data/action/'..action..'_d4'
+        if not paths.dirp(to_save_folder) then paths.mkdir(to_save_folder) end
         print('dataset:'..dataset_name)
         print('to save:'..to_save_folder)
 

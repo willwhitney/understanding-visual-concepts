@@ -35,10 +35,10 @@ jobs = []
 
 # noise_options = [0.1]
 # sharpening_rate_options = [10]
-learning_rate_options = [30e-5, 40e-5, 50e-5, 60e-5, 70e-5]
+learning_rate_options = [20e-5]
 # motion_scale_options = [3]
-heads_options = [1]
-dataset_name_options = ['allactions']
+heads_options = [1,2,3]
+dataset_name_options = ['allactionsd4']
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 # for noise in noise_options:
@@ -65,7 +65,7 @@ else:
     print "Starting jobs:"
 
 for job in jobs:
-    jobname = "action"
+    jobname = "actiond4"
     flagstring = ""
     for flag in job:
         if isinstance(job[flag], bool):

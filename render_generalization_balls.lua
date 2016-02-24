@@ -83,13 +83,13 @@ for _, network in ipairs(networks) do
         local decoder = model.modules[2]
 
 
-        for _, batch_index in ipairs{100} do
+        for _, batch_index in ipairs{25,50,75,100} do
             print("Batch index: ", batch_index)
             -- local images = {}
 
 
             -- fetch a batch
-            local input = data_loaders.load_balls_batch(batch_index, 'test')
+            local input = data_loaders.load_balls_batch(batch_index, 'train')
             local output = model:forward(input):clone()
             local embedding_from_previous = previous_embedding.output:clone()
             -- local embedding_from_current = current_embedding.output:clone()
@@ -115,7 +115,7 @@ for _, network in ipairs(networks) do
             -- end
 
 
-            for _, input_index in pairs{1, 15} do  -- example in the batch
+            for _, input_index in pairs{1,6,11,16,21,26} do  -- example in the batch
                 collectgarbage()
                 print("Input index: ", input_index)
                 local base_embedding = embedding_from_previous[input_index]:clone():float()

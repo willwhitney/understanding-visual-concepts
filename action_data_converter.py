@@ -11,9 +11,16 @@ from progressbar import ProgressBar
 # to your local computer as the root folder below. There should be a folder for
 # each of the actions below under the videos folder
 
+# pc
 root = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/videos'
 out = '/Users/MichaelChang/Documents/Researchlink/SuperUROP/Code/data/udcign/action/hdf5'
+
+# openmind
+# root = '/om/data/public/mbchang/udcign-data/action/raw/videos'
+# out = '/om/data/public/mbchang/udcign-data/action/raw/hdf5'
+
 actions = ['boxing', 'handclapping', 'handwaving', 'jogging', 'running', 'walking']
+scenario = 'd4'  # d4 means outdoors
 subsample = 1
 gray = True
 
@@ -26,6 +33,9 @@ for action in actions:
     pbar = ProgressBar()
     for i in pbar(range(len(os.listdir(action_vid_folder)))):
         vid = os.listdir(action_vid_folder)[i]
+        if scenario not in vid: continue
+        # print vid
+        # continue
         cap = cv2.VideoCapture(os.path.join(action_vid_folder, vid))
         num_frames = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
         video = []
@@ -34,6 +44,7 @@ for action in actions:
         # the frames are guaranteed to be consecutive
         for i in range(int(num_frames)):
             ret, frame = cap.read()
+            # print frame
 
             if gray: frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # shape: (height, width)  it is gray anyway
             if i % subsample == 0:
@@ -48,12 +59,12 @@ for action in actions:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         cap.release()
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
 
         video = u.stack(video)
         action_vids[vid] = video  # video, subsampled, evenly spaced, consecutive video
     pbar.finish()
-    u.save_dict_to_hdf5(dataset=action_vids, dataset_name=action+'_subsamp='+str(subsample), dataset_folder=out)
+    u.save_dict_to_hdf5(dataset=action_vids, dataset_name=action+'_subsamp='+str(subsample)+'_scenario='+scenario, dataset_folder=out)
 
     # action_vids = np.vstack(action_vids)  # consecutive video  ACTUALLY THIS MIGHT NOT BE TRUE. WE NEED THE VIDEOS TO BE SEPARATE!
 

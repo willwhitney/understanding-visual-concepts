@@ -16,14 +16,14 @@ cmd:option('-import', '', 'initialize network parameters from checkpoint at this
 
 -- data
 cmd:option('--datasetdir', '/om/data/public/mbchang/udcign-data/action', 'dataset source directory')  -- change
-cmd:option('--dataset_name', 'allactions', 'dataset source directory')
+cmd:option('--dataset_name', 'allactionsd4', 'dataset source directory')
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
 cmd:option('--learning_rate', 1e-4, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
-cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to start decaying the learning rate')
-cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
+cmd:option('--learning_rate_decay_after', 7000, 'in number of examples, when to start decaying the learning rate')
+cmd:option('--learning_rate_decay_interval', 1000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
@@ -67,7 +67,8 @@ local dsizes = {walking={num_train_batches=1347,num_test_batches=288},
                 handclapping={num_train_batches=957,num_test_batches=205},
                 handwaving={num_train_batches=1216,num_test_batches=260},
                 boxing={num_train_batches=1015,num_test_batches=217},
-                alldata={num_train_batches=6527,num_test_batches=1395}}
+                allactions={num_train_batches=6527,num_test_batches=1395},
+                allactionsd4={num_train_batches=1468,num_test_batches=311}}
 opt.num_train_batches = dsizes[opt.dataset_name].num_train_batches
 opt.num_test_batches = dsizes[opt.dataset_name].num_test_batches
 opt.eval_val_every = opt.num_train_batches
