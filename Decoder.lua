@@ -1,8 +1,11 @@
 require 'nn'
+require 'modules/LinearCR'
+
 
 local Decoder = function(dim_hidden, color_channels, feature_maps, batch_norm)
     local decoder = nn.Sequential()
-    decoder:add(nn.Linear(dim_hidden, (feature_maps/4)*15*15 ))
+    -- decoder:add(nn.Linear(dim_hidden, (feature_maps/4)*15*15 ))
+    decoder:add(nn.LinearCR(dim_hidden, (feature_maps/4)*15*15 ))
     decoder:add(nn.Threshold(0,1e-6))
 
     decoder:add(nn.Reshape((feature_maps/4),15,15))

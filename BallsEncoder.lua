@@ -1,5 +1,7 @@
 require 'nn'
 require 'nngraph'
+require 'modules/LinearCR'
+require 'modules/Reparametrize'
 
 require 'Print'
 require 'ChangeLimiter'
@@ -39,7 +41,13 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     enc1:add(nn.Threshold(0,1e-6))
 
     enc1:add(nn.Reshape((feature_maps/4) * 15*15))
-    enc1:add(nn.Linear((feature_maps/4) * 15*15, dim_hidden))
+    -- enc1:add(nn.Linear((feature_maps/4) * 15*15, dim_hidden))
+
+    local z = nn.ConcatTable()
+    z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
+    z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
+    enc1:add(z)
+    enc1:add(nn.Reparametrize(dim_hidden))
 
     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
     enc1 = enc1(inputs[1])

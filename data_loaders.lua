@@ -1,4 +1,6 @@
 require 'image'
+torch.manualSeed(123)
+
 
 local data_loaders = {}
 

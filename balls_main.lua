@@ -1,6 +1,6 @@
 require 'nn'
 require 'optim'
-
+require 'modules/KLDCriterion'
 require 'MotionBCECriterion'
 
 local Encoder = require 'BallsEncoder'
@@ -46,12 +46,12 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
-cmd:option('--print_every', 10, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 4500, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
+cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
+cmd:option('--eval_val_every', 3, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
 
 -- data
 cmd:option('--num_train_batches', 9000, 'number of batches to train with per epoch')  -- CHANGE
-cmd:option('--num_test_batches', 1000, 'number of batches to test with')  -- CHANGE
+cmd:option('--num_test_batches', 1, 'number of batches to test with')  -- CHANGE
 
 -- GPU/CPU
 cmd:option('--gpu', true, 'which gpu to use. -1 = use CPU')
@@ -107,23 +107,28 @@ end
 local scheduler_iteration = torch.zeros(1)
 
 local model = nn.Sequential()
-model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
-model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
+local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads)
+local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm)
+model:add(encoder)
+-- model:add(nn.Reparametrize(dim_hidden))
+model:add(decoder)
 
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
-    criterion = nn.BCECriterion()
-    -- criterion = nn.MotionBCECriterion(opt.motion_scale)
+    -- criterion = nn.BCECriterion()
+    criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")
 end
+KLD = nn.KLDCriterion()  -- variational
 
 if opt.gpu then
     model:cuda()
     criterion:cuda()
+    KLD:cuda()  -- variational
 end
 params, grad_params = model:getParameters()
 
@@ -136,7 +141,7 @@ function validate()
         -- fetch a batch
         local input = data_loaders.load_balls_batch(i, 'test')
 
-        output = model:forward(input)
+        local output = model:forward(input)
 
         local step_loss = criterion:forward(output, input[2])
         loss = loss + step_loss
@@ -161,13 +166,38 @@ function feval(x)
     model:training() -- make sure we are in correct mode
 
 
-    output = model:forward(input)
+    local output = model:forward(input)
 
-    loss = criterion:forward(output, input[2])
-    grad_output = criterion:backward(output, input[2]):clone()
+    -- ######################################################################--
+    -- Your code here for variational
+
+    local loss = -criterion:forward(output, input[2])
+    local grad_output = criterion:backward(output, input[2]):clone():mul(-1)
 
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
+
+    local encoder_output = model:get(1).output
+
+    local KLDerr = KLD:forward(encoder_output, input[2])
+    local dKLD_dw = KLD:backward(encoder_output, input[2])
+
+    print('loss', loss)
+    print('encoder_output', encoder_output:size())
+    print('KLDerr', KLDerr)
+    print('dKLD_dw', dKLD_dw)
+
+    encoder:backward(input,dKLD_dw)  -- this doesn't work because reparametrize is in a different place
+
+    local lowerbound = loss  + KLDerr
+
+    if opt.verbose then
+        print("BCE",loss/batch:size(1))
+        print("KLD", KLDerr/batch:size(1))
+        print("lowerbound", lowerbound/batch:size(1))
+    end
+
+    --#######################################################################--
 
 
     ------------------ regularize -------------------
@@ -181,7 +211,8 @@ function feval(x)
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
     collectgarbage()
-    return loss, grad_params
+    -- return loss, grad_params
+    return lowerbound, grad_params  -- this is from variational autoencoder
 end
 
 
