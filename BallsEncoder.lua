@@ -47,7 +47,7 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     enc1:add(z)
-    enc1:add(nn.Reparametrize(dim_hidden))
+    -- enc1:add(nn.Reparametrize(dim_hidden))
 
     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
     enc1 = enc1(inputs[1])
@@ -87,6 +87,8 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     local change_limiter = nn.ChangeLimiter()({dist, enc1, enc2}):annotate{name="change_limiter"}
 
     local output = {change_limiter}
+    output = nn.Reparametrize(dim_hidden)(output)
+    -- enc1:add(nn.Reparametrize(dim_hidden))
     return nn.gModule(inputs, output)
 end
 
