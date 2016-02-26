@@ -10,7 +10,7 @@ local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
 
-cmd:option('--name', 'net', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
+cmd:option('--name', 'netvar', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
 cmd:option('--checkpoint_dir', 'logslink', 'output directory where checkpoints get written')
 cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
 
@@ -113,6 +113,14 @@ model:add(encoder)
 -- model:add(nn.Reparametrize(dim_hidden))
 model:add(decoder)
 
+
+local encoder1 = encoder:findModules('nn.ConcatTable')[1]
+local encoder2 = encoder:findModules('nn.ConcatTable')[2]
+
+-- print(encoder.modules)
+-- print(encoder:findModules('nn.ConcatTable'))  -- do gradient wrt to this
+print(encoder1)
+assert(false)
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
@@ -171,31 +179,58 @@ function feval(x)
     -- ######################################################################--
     -- Your code here for variational
 
-    local loss = -criterion:forward(output, input[2])
-    local grad_output = criterion:backward(output, input[2]):clone():mul(-1)
+    -- local loss = -criterion:forward(output, input[2])
+    -- local grad_output = criterion:backward(output, input[2]):clone():mul(-1)
+
+    local loss = criterion:forward(output, input[2])
+    local grad_output = criterion:backward(output, input[2]):clone()
 
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
 
-    local encoder_output = model:get(1).output
+    -- local enc1out = encoder1.output
+    -- local enc2out = encoder2.output
 
-    local KLDerr = KLD:forward(encoder_output, input[2])
-    local dKLD_dw = KLD:backward(encoder_output, input[2])
+    -- encoder1
+    -- local KLDerr1 = KLD:forward(enc1out, input[1])
+    -- local dKLD_dw1 = KLD:backward(enc1out, input[1])
+    -- encoder1:backward(input[1],dKLD_dw1)  -- this doesn't work because reparametrize is in a different place
 
-    print('loss', loss)
-    print('encoder_output', encoder_output:size())
-    print('KLDerr', KLDerr)
-    print('dKLD_dw', dKLD_dw)
+    -- encoder2
+    -- local KLDerr2 = KLD:forward(enc2out, input[2])
+    -- local dKLD_dw2 = KLD:backward(enc2out, input[2])
+    -- encoder1:backward(input[2],dKLD_dw2)  -- this doesn't work because reparametrize is in a different place
 
-    encoder:backward(input,dKLD_dw)  -- this doesn't work because reparametrize is in a different place
+    -- local lowerbound = loss  + KLDerr1/2 + KLDerr2/2
+    --
+    -- if opt.verbose then
+    --     print("BCE",loss/batch:size(1))
+    --     print("KLD", KLDerr/batch:size(1))
+    --     print("lowerbound", lowerbound/batch:size(1))
+    -- end
 
-    local lowerbound = loss  + KLDerr
+    --$$$$$$$$$$$$$$$$$$$$$$ From dual objectives
 
-    if opt.verbose then
-        print("BCE",loss/batch:size(1))
-        print("KLD", KLDerr/batch:size(1))
-        print("lowerbound", lowerbound/batch:size(1))
-    end
+    -- reuse the outputs of the encoders, since they're the same
+
+
+    -- local input1_recon = decoder:forward(encoder1.output)
+    -- loss = loss + criterion:forward(input1_recon, input[1]) / 4
+    -- local grad_output1 = criterion:backward(input1_recon, input[1]) / 4
+    --
+    -- local grad_encoding1 = decoder:backward(encoder1.output, grad_output1)
+    -- encoder1:backward(input[1], grad_encoding1)
+    --
+    --
+    -- local input2_recon = decoder:forward(encoder2.output)
+    -- loss = loss + criterion:forward(input2_recon, input[2]) / 4
+    -- local grad_output2 = criterion:backward(input2_recon, input[2]) / 4
+    --
+    -- local grad_encoding2 = decoder:backward(encoder2.output, grad_output2)
+    -- encoder2:backward(input[2], grad_encoding2)
+
+    --$$$$$$$$$$$$$$$$$$$$$
+
 
     --#######################################################################--
 
@@ -211,8 +246,8 @@ function feval(x)
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
     collectgarbage()
-    -- return loss, grad_params
-    return lowerbound, grad_params  -- this is from variational autoencoder
+    return loss, grad_params
+    -- return lowerbound, grad_params  -- this is from variational autoencoder
 end
 
 
