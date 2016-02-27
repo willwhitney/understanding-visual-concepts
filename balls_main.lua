@@ -21,7 +21,7 @@ cmd:option('--subsample', 3, 'subsample')  -- hard code this into data_loader
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
-cmd:option('--learning_rate', 30e-5, 'learning rate')
+cmd:option('--learning_rate', 3e-5, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
 cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to start decaying the learning rate')
 cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
@@ -119,15 +119,15 @@ local encoder2 = encoder:findModules('nn.ConcatTable')[2]
 
 -- print(encoder.modules)
 -- print(encoder:findModules('nn.ConcatTable'))  -- do gradient wrt to this
-print(encoder1)
-assert(false)
+-- print(encoder1)
+-- assert(false)
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
-    -- criterion = nn.BCECriterion()
-    criterion = nn.MotionBCECriterion(opt.motion_scale)
+    criterion = nn.BCECriterion()
+    -- criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")
 end
@@ -179,35 +179,36 @@ function feval(x)
     -- ######################################################################--
     -- Your code here for variational
 
-    -- local loss = -criterion:forward(output, input[2])
-    -- local grad_output = criterion:backward(output, input[2]):clone():mul(-1)
+    local loss = -criterion:forward(output, input[2])
+    local grad_output = criterion:backward(output, input[2]):clone():mul(-1) --gradient ascent. why is this the likelihood cost function?
 
-    local loss = criterion:forward(output, input[2])
-    local grad_output = criterion:backward(output, input[2]):clone()
+    -- local loss = criterion:forward(output, input[2])
+    -- local grad_output = criterion:backward(output, input[2]):clone()
 
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
 
-    -- local enc1out = encoder1.output
-    -- local enc2out = encoder2.output
+    local enc1out = encoder1.output
+    local enc2out = encoder2.output
 
     -- encoder1
-    -- local KLDerr1 = KLD:forward(enc1out, input[1])
-    -- local dKLD_dw1 = KLD:backward(enc1out, input[1])
-    -- encoder1:backward(input[1],dKLD_dw1)  -- this doesn't work because reparametrize is in a different place
+    local KLDerr1 = KLD:forward(enc1out, input[1])
+    local dKLD_dw1 = KLD:backward(enc1out, input[1])
+    encoder1:backward(input[1],dKLD_dw1)  -- this doesn't work because reparametrize is in a different place
 
     -- encoder2
-    -- local KLDerr2 = KLD:forward(enc2out, input[2])
-    -- local dKLD_dw2 = KLD:backward(enc2out, input[2])
-    -- encoder1:backward(input[2],dKLD_dw2)  -- this doesn't work because reparametrize is in a different place
+    local KLDerr2 = KLD:forward(enc2out, input[2])
+    local dKLD_dw2 = KLD:backward(enc2out, input[2])
+    encoder1:backward(input[2],dKLD_dw2)  -- this doesn't work because reparametrize is in a different place
 
-    -- local lowerbound = loss  + KLDerr1/2 + KLDerr2/2
-    --
-    -- if opt.verbose then
-    --     print("BCE",loss/batch:size(1))
-    --     print("KLD", KLDerr/batch:size(1))
-    --     print("lowerbound", lowerbound/batch:size(1))
-    -- end
+    local KLDerr = KLDerr1/2 + KLDerr2/2
+    local lowerbound = loss  + KLDerr
+
+    if true then
+        print("BCE",loss/input[1]:size(1))
+        print("KLD", KLDerr/input[1]:size(1))
+        print("lowerbound", lowerbound/input[1]:size(1))
+    end
 
     --$$$$$$$$$$$$$$$$$$$$$$ From dual objectives
 
@@ -246,8 +247,8 @@ function feval(x)
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
     collectgarbage()
-    return loss, grad_params
-    -- return lowerbound, grad_params  -- this is from variational autoencoder
+    -- return loss, grad_params
+    return lowerbound, grad_params  -- this is from variational autoencoder
 end
 
 
