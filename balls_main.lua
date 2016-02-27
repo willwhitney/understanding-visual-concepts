@@ -151,8 +151,24 @@ function validate()
 
         local output = model:forward(input)
 
-        local step_loss = criterion:forward(output, input[2])
-        loss = loss + step_loss
+        local err = -criterion:forward(output, input[2])
+
+        local enc1out = encoder1.output
+        local enc2out = encoder2.output
+
+        -- encoder1
+        local KLDerr1 = KLD:forward(enc1out, input[1])
+
+        -- encoder2
+        local KLDerr2 = KLD:forward(enc2out, input[2])
+
+        local KLDerr = KLDerr1/2 + KLDerr2/2
+        local lowerbound = err + KLDerr -- want to maximize this?
+        loss = loss + lowerbound
+
+        -- TODO: do variational stuff here
+        -- local step_loss = criterion:forward(output, input[2])
+        -- loss = loss + step_loss
     end
 
     loss = loss / opt.num_test_batches
@@ -194,17 +210,17 @@ function feval(x)
     -- encoder1
     local KLDerr1 = KLD:forward(enc1out, input[1])
     local dKLD_dw1 = KLD:backward(enc1out, input[1])
-    encoder1:backward(input[1],dKLD_dw1)  -- this doesn't work because reparametrize is in a different place
+    encoder1:backward(input[1],dKLD_dw1) -- does this go backward through the entire encoder1?
 
     -- encoder2
     local KLDerr2 = KLD:forward(enc2out, input[2])
     local dKLD_dw2 = KLD:backward(enc2out, input[2])
-    encoder1:backward(input[2],dKLD_dw2)  -- this doesn't work because reparametrize is in a different place
+    encoder1:backward(input[2],dKLD_dw2)  -- does this go backward through the entire encoder2?
 
     local KLDerr = KLDerr1/2 + KLDerr2/2
-    local lowerbound = loss  + KLDerr
+    local lowerbound = loss + KLDerr -- want to maximize this?
 
-    if true then
+    if opt.verbose then
         print("BCE",loss/input[1]:size(1))
         print("KLD", KLDerr/input[1]:size(1))
         print("lowerbound", lowerbound/input[1]:size(1))
@@ -283,7 +299,8 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
+        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
+        -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
     -- every now and then or on last iteration
