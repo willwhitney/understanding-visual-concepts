@@ -270,7 +270,8 @@ end
 
 train_losses = {}
 val_losses = {}
-local optim_state = {learningRate = opt.learning_rate, alpha = opt.decay_rate}
+-- local optim_state = {learningRate = opt.learning_rate, alpha = opt.decay_rate}
+local optim_state = {learningRate = -opt.learning_rate, alpha = opt.decay_rate}
 local iterations = opt.max_epochs * opt.num_train_batches
 -- local iterations_per_epoch = opt.num_train_batches
 local loss0 = nil
