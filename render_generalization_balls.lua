@@ -89,7 +89,7 @@ for _, network in ipairs(networks) do
 
 
             -- fetch a batch
-            local input = data_loaders.load_balls_batch(batch_index, 'train')
+            local input = data_loaders.load_balls_batch(batch_index, 'test')
             local output = model:forward(input):clone()
             local embedding_from_previous = previous_embedding.output:clone()
             -- local embedding_from_current = current_embedding.output:clone()
@@ -140,9 +140,9 @@ for _, network in ipairs(networks) do
                     -- local max_weight, varying_index = weights:max(1)
 
 
-                    local num_frames = 80  -- how many frames to predict?
-                    local min_change = -4.5  -- low
-                    local max_change = 4.5  -- high
+                    local num_frames = 40  -- how many frames to predict?
+                    local min_change = -1.5  -- low
+                    local max_change = 1.5  -- high
 
 
                     local mutated_input = torch.Tensor(num_frames, base_embedding:size(1))

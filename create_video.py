@@ -35,7 +35,7 @@ def create_gif(images_root):
 
 if __name__ == '__main__':
     root = '/Users/MichaelChang/Dropbox (MIT Solar Car Team)/MacHD/Documents/Important/MIT/Research/SuperUROP/Code/unsupervised-dcign/renderings/mutation'
-    images_root = 'ballsgss3_Feb_23_08_10'
+    images_root = 'ballsvar_Feb_27_22_14'
     for exp in [f for f in os.listdir(os.path.join(root,images_root)) if '.txt' not in f and not f.startswith('.')]:
         for demo in [f for f in os.listdir(os.path.join(*[root,images_root,exp])) if not f.startswith('.')]:
             print demo

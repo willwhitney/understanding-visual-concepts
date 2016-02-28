@@ -34,7 +34,7 @@ base_networks = {
 jobs = []
 
 # noise_options = [0.1]
-sharpening_rate_options = [1000, 5000]
+sharpening_rate_options = [10]
 learning_rate_options = [1e-5,2e-5,3e-5]
 heads_options = [1]
 numballs_options = [1]
