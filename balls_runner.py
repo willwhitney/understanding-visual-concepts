@@ -34,16 +34,16 @@ base_networks = {
 jobs = []
 
 # noise_options = [0.1]
-sharpening_rate_options = [10,50,100]
-learning_rate_options = [1e-5,3e-5,1e-4]
+sharpening_rate_options = [1000, 5000]
+learning_rate_options = [1e-5,2e-5,3e-5]
 heads_options = [1]
 numballs_options = [1]
 subsamp_options = [3]
-decay_rate_options = [0.95, 0.7, 0.5]
+learning_rate_decay_options = [0.7, 0.5]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 # for noise in noise_options:
-for decay_rate in decay_rate_options:
+for learning_rate_decay in learning_rate_decay_options:
     for sharpening_rate in sharpening_rate_options:
         for learning_rate in learning_rate_options:
             for numballs in numballs_options:
@@ -56,7 +56,7 @@ for decay_rate in decay_rate_options:
                                     "heads": heads,
                                     "numballs": numballs,
                                     "subsample":subsamp,
-                                    "decay_rate": decay_rate
+                                    "learning_rate_decay": learning_rate_decay
                                     # "dataset_name": dataset_name
                                     # "gpu": True,
                                 }

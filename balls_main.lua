@@ -3,6 +3,8 @@ require 'optim'
 require 'modules/KLDCriterion'
 require 'MotionBCECriterion'
 
+schedule_weight_iter = 0  -- GLOBAL VARIABLES
+schedule_weight_exp = 1  -- GLOBAL VARIABLES
 local Encoder = require 'BallsEncoder'
 local Decoder = require 'Decoder'
 
@@ -21,11 +23,11 @@ cmd:option('--subsample', 3, 'subsample')  -- hard code this into data_loader
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
-cmd:option('--learning_rate', 3e-5, 'learning rate')
-cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
+cmd:option('--learning_rate', 1e-5, 'learning rate')
+cmd:option('--learning_rate_decay', 0.7, 'learning rate decay')
 cmd:option('--learning_rate_decay_after', 200, 'in number of examples, when to start decaying the learning rate')
 cmd:option('--learning_rate_decay_interval', 100, 'in number of examples, how often to decay the learning rate')
-cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
+cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')  -- this is momentum
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
 cmd:option('--L2', 0, 'amount of L2 regularization')
@@ -38,7 +40,7 @@ cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels'
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
 cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
-cmd:option('--sharpening_rate', 10, 'number of feature maps')
+cmd:option('--sharpening_rate', 1000, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 
@@ -278,6 +280,7 @@ local loss0 = nil
 
 for step = 1, iterations do
     scheduler_iteration[1] = step
+    schedule_weight_iter = step
     epoch = step / opt.num_train_batches
 
     local timer = torch.Timer()
@@ -300,7 +303,7 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
+        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp))
         -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
