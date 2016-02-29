@@ -3,6 +3,9 @@ require 'optim'
 
 require 'MotionBCECriterion'
 
+schedule_weight_iter = 0  -- GLOBAL VARIABLES
+schedule_weight_exp = 1  -- GLOBAL VARIABLES
+
 local Encoder = require 'BallsEncoder'
 local Decoder = require 'Decoder'
 
@@ -21,22 +24,22 @@ cmd:option('--subsample', 3, 'subsample')  -- hard code this into data_loader
 cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and input[2]')
 
 -- optimization
-cmd:option('--learning_rate', 30e-5, 'learning rate')
+cmd:option('--learning_rate', 1e-4, 'learning rate')
 cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
-cmd:option('--learning_rate_decay_after', 18000, 'in number of examples, when to start decaying the learning rate')
-cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how often to decay the learning rate')
+cmd:option('--learning_rate_decay_after', 1000, 'in number of examples, when to start decaying the learning rate')
+cmd:option('--learning_rate_decay_interval', 1000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
-cmd:option('--L2', 0, 'amount of L2 regularization')
+cmd:option('--L2', 0.01, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
 cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels')
 
-cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
-cmd:option('--feature_maps', 72, 'number of feature maps')
+cmd:option('--dim_hidden', 64, 'dimension of the representation layer')
+cmd:option('--feature_maps', 32, 'number of feature maps')
 cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
@@ -46,8 +49,8 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
-cmd:option('--print_every', 10, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 4500, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
+cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
+cmd:option('--eval_val_every', 1000, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
 
 -- data
 cmd:option('--num_train_batches', 9000, 'number of batches to train with per epoch')  -- CHANGE
@@ -110,6 +113,7 @@ local model = nn.Sequential()
 model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
 model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
+-- scheduler_iteration[1] = 5
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
@@ -121,11 +125,20 @@ else
     error("Invalid criterion specified!")
 end
 
+
+
+-- this seems to dereference scheduler_iteration? why?
 if opt.gpu then
     model:cuda()
     criterion:cuda()
 end
+
+-- scheduler_iteration[1] = 6
+-- print('outside'..scheduler_iteration[1])
+
 params, grad_params = model:getParameters()
+
+
 
 
 function validate()
@@ -173,7 +186,7 @@ function feval(x)
     ------------------ regularize -------------------
     if opt.L2 > 0 then
         -- Loss:
-        loss = loss + opt.coefL2 * params:norm(2)^2/2
+        loss = loss + opt.L2 * params:norm(2)^2/2
         -- Gradients:
         grad_params:add( params:clone():mul(opt.L2) )
     end
@@ -185,6 +198,9 @@ function feval(x)
 end
 
 
+
+
+
 train_losses = {}
 val_losses = {}
 local optim_state = {learningRate = opt.learning_rate, alpha = opt.decay_rate}
@@ -194,6 +210,10 @@ local loss0 = nil
 
 for step = 1, iterations do
     scheduler_iteration[1] = step
+    schedule_weight_iter = step
+    -- print('outside'..scheduler_iteration[1])
+    -- scheduler_iteration[1] = 5
+
     epoch = step / opt.num_train_batches
 
     local timer = torch.Timer()
@@ -216,7 +236,8 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
+        -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
+        print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp))
     end
 
     -- every now and then or on last iteration

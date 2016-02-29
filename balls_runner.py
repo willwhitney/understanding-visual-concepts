@@ -5,7 +5,7 @@ dry_run = '--dry-run' in sys.argv
 local   = '--local' in sys.argv
 detach  = '--detach' in sys.argv
 
-dry_run = True
+dry_run = False
 local = False
 detach = True
 
@@ -35,29 +35,35 @@ jobs = []
 
 # noise_options = [0.1]
 # sharpening_rate_options = [10]
-learning_rate_options = [40e-5, 50e-5]
-heads_options = [1,2,3]
-numballs_options = [2,3]
+learning_rate_options = [3e-4, 1e-4]
+heads_options = [1]
+numballs_options = [1]
 subsamp_options = [3]
+dim_hidden_options = [32,64,128]
+feature_maps_options = [16,32,64]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 # for noise in noise_options:
 # for sharpening_rate in sharpening_rate_options:
-for learning_rate in learning_rate_options:
-    for numballs in numballs_options:
-        for heads in heads_options:
-            for subsamp in subsamp_options:
-                job = {
-                            # "noise": noise,
-                            # "sharpening_rate": sharpening_rate,
-                            "learning_rate": learning_rate,
-                            "heads": heads,
-                            "numballs": numballs,
-                            "subsample":subsamp
-                            # "dataset_name": dataset_name
-                            # "gpu": True,
-                        }
-                jobs.append(job)
+for dh in dim_hidden_options:
+    for fm in feature_maps_options:
+        for learning_rate in learning_rate_options:
+            for numballs in numballs_options:
+                for heads in heads_options:
+                    for subsamp in subsamp_options:
+                        job = {
+                                    # "noise": noise,
+                                    # "sharpening_rate": sharpening_rate,
+                                    "learning_rate": learning_rate,
+                                    "heads": heads,
+                                    "numballs": numballs,
+                                    "subsample":subsamp,
+                                    "dim_hidden": dh,
+                                    "feature_maps":fm
+                                    # "dataset_name": dataset_name
+                                    # "gpu": True,
+                                }
+                        jobs.append(job)
 
 
 if dry_run:
@@ -66,7 +72,7 @@ else:
     print "Starting jobs:"
 
 for job in jobs:
-    jobname = "balls"
+    jobname = "ballsreg"
     flagstring = ""
     for flag in job:
         if isinstance(job[flag], bool):
@@ -110,7 +116,11 @@ for job in jobs:
             slurmfile.write("#SBATCH --gres=gpu:1\n")
             slurmfile.write("#SBATCH --mem=30000\n")
             slurmfile.write("#SBATCH --time=6-23:00:00\n")
-            slurmfile.write("#SBATCH -x node027\n")
+            slurmfile.write("#SBATCH -x node004\n")
+            slurmfile.write("#SBATCH -x node003\n")
+            slurmfile.write("#SBATCH -x node046\n")
+            slurmfile.write("#SBATCH -x node002\n")
+
             slurmfile.write(jobcommand)
 
         if not dry_run:

@@ -14,7 +14,9 @@ function ScheduledWeightSharpener:__init(sharpening_rate, iteration_container)
 end
 
 function ScheduledWeightSharpener:getP()
+    -- print('iteration container in getp'..self.iteration_container[1])
     local iteration = self.iteration_container[1]
+    local iteration = schedule_weight_iter
     return math.min(1 + (iteration / 10000) * self.slope, 100)
 end
 
@@ -25,8 +27,9 @@ function ScheduledWeightSharpener:updateOutput(input)
     -- smoothly increase the sharpening from 1 to 100
     -- iteration is defined globally in the training loop
     local p = self:getP()
+    schedule_weight_exp = p
     -- print('v:', v)
-    -- print('p:', p)
+    -- print('p:'..p)
     self.output = torch.pow(v, p)
     if self.output[1][1] ~= self.output[1][1] then
         print('Made a nan set of weights.')
