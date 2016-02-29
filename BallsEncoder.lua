@@ -64,7 +64,7 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     enc1:add(z)
-    print(enc1)
+    -- print(enc1)
 
     enc1var:add(enc1)
     -- print(enc1var)

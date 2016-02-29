@@ -116,13 +116,11 @@ model:add(encoder)
 model:add(decoder)
 
 
-local encoder1 = encoder:findModules('nn.ConcatTable')[1]
-local encoder2 = encoder:findModules('nn.ConcatTable')[2]
-
--- print(encoder.modules)
--- print(encoder:findModules('nn.ConcatTable'))  -- do gradient wrt to this
+local encoder1 = encoder:findModules('nn.Sequential')[1]:findModules('nn.Sequential')  -- goes up to the z ConcatTable
+local encoder2 = encoder:findModules('nn.Sequential')[2]:findModules('nn.Sequential')  -- okay why doesn't this work?
 -- print(encoder1)
 -- assert(false)
+
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
 if opt.criterion == 'MSE' then
@@ -206,11 +204,25 @@ function feval(x)
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
 
-    local enc1out = encoder1.output
-    local enc2out = encoder2.output
+
+    -- I guess you can just make encoder1 do the forward on the input
+
+
+    -- local enc1out = encoder1.output
+    -- local enc2out = encoder2.output
+    local enc1out = encoder1:forward(input)
+    local enc2out = encoder2:forward(input)
+
+    -- bug: encoder1.output is nil
+
+    print('enc1out')
+    print(enc1out)
 
     -- encoder1
     local KLDerr1 = KLD:forward(enc1out, input[1])
+    print(input)
+    print('hi')
+    assert(false)
     local dKLD_dw1 = KLD:backward(enc1out, input[1])
     encoder1:backward(input[1],dKLD_dw1) -- does this go backward through the entire encoder1?
 
