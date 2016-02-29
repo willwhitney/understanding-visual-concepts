@@ -8,6 +8,7 @@ schedule_weight_exp = 1  -- GLOBAL VARIABLES
 
 local Encoder = require 'BallsEncoder'
 local Decoder = require 'Decoder'
+local ApplyHeads = require 'ApplyHeads'
 
 local data_loaders = require 'data_loaders'
 
@@ -38,8 +39,8 @@ cmd:option('--batch_norm', false, 'use model with batch normalization')
 cmd:option('--heads', 1, 'how many filtering heads to use')
 cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels')
 
-cmd:option('--dim_hidden', 64, 'dimension of the representation layer')
-cmd:option('--feature_maps', 32, 'number of feature maps')
+cmd:option('--dim_hidden', 32, 'dimension of the representation layer')
+cmd:option('--feature_maps', 16, 'number of feature maps')
 cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
 cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
@@ -111,6 +112,8 @@ local scheduler_iteration = torch.zeros(1)
 
 local model = nn.Sequential()
 model:add(Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads))
+model:add(ApplyHeads(opt.heads,opt.dim_hidden,opt.noise,opt.sharpening_rate,scheduler_iteration))
+-- num_heads, dim_hidden, noise, sharpening_rate, scheduler_iteration
 model:add(Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm))
 
 -- scheduler_iteration[1] = 5
@@ -237,7 +240,7 @@ for step = 1, iterations do
 
     if step % opt.print_every == 0 then
         -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
-        print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp))
+        print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
     end
 
     -- every now and then or on last iteration
