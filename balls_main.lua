@@ -149,7 +149,7 @@ function validate()
 
     for i = 1, opt.num_test_batches do -- iterate over batches in the split
         -- fetch a batch
-        local input = data_loaders.load_balls_batch(i, 'test')
+        local input = data_loaders.load_balls_batch(i, 'val')
 
         local output = model:forward(input)
 
@@ -303,7 +303,7 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp))
+        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
         -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
