@@ -8,21 +8,6 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
--- add this in
--- function Bottleneck(feature_maps, dim_hidden,)
-
---     local z = nn.ConcatTable()
---     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
---     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
---     enc1:add(z)
-    -- TODO actually we should modularize the entire encoder up to the above
---
---     enc1:add(nn.Reparametrize(dim_hidden))
---
---     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
---     enc1 = enc1(inputs[1])
---     enc2 = enc2(inputs[2])
--- end
 
 local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm, num_heads)
 
@@ -64,10 +49,8 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     z:add(nn.LinearCR((feature_maps/4)*15*15, dim_hidden))
     enc1:add(z)
-    -- print(enc1)
 
     enc1var:add(enc1)
-    -- print(enc1var)
 
     enc1var:add(nn.Reparametrize(dim_hidden))  -- maybe this does not need to be part of the encoder definition, however, the reprametrize must share weights though
 
@@ -75,15 +58,6 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     enc1 = enc1var(inputs[1])
     enc2 = enc2var(inputs[2])
 
-    --
-    -- local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
-    -- enc1 = enc1(inputs[1])
-    -- enc2 = enc2(inputs[2])
-
-    -- return nn.gModule(inputs, {enc1,enc2})
-    --
-    --
-    --
     -- make the heads to analyze the encodings
     local heads = {}
     heads[1] = nn.Sequential()

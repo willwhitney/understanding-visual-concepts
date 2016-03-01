@@ -112,34 +112,10 @@ local model = nn.Sequential()
 local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads)
 local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm)
 model:add(encoder)
--- model:add(nn.Reparametrize(dim_hidden))
 model:add(decoder)
 
--- print(encoder:findModules('nn.ConcatTable')[1])
--- assert(false)
-
--- local encoder1 = encoder:findModules('nn.Sequential')[1]:findModules('nn.Sequential')  -- goes up to the z ConcatTable
--- local encoder2 = encoder:findModules('nn.Sequential')[2]:findModules('nn.Sequential')  -- okay why doesn't this work?
-
-local encoder1 = encoder:findModules('nn.Sequential')[2]  -- goes up to the z ConcatTable
-local encoder2 = encoder:findModules('nn.Sequential')[4]  -- okay why doesn't this work?
-
--- print('encoder1')
--- print(encoder1)
--- print('encoder2')
--- print(encoder2)
--- print('encoderout')
--- print(encoder.output)
--- print('encoder1out')
--- print(encoder1.output)
--- assert(false)
-
--- local aaa = encoder:findModules('nn.Sequential')
--- for i,v in pairs(aaa) do
---     print(i,v.modules)
--- end
--- --print(encoder:findModules('nn.Sequential'))
--- assert(false)
+local encoder1 = encoder:findModules('nn.Sequential')[2]  -- enc1, not enc1var
+local encoder2 = encoder:findModules('nn.Sequential')[4]  -- enc2, not enc2var
 
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
@@ -224,25 +200,11 @@ function feval(x)
     ------------------ backward pass -------------------
     model:backward(input, grad_output)
 
-
-    -- I guess you can just make encoder1 do the forward on the input
-
-
     local enc1out = encoder1.output
     local enc2out = encoder2.output
-    -- local enc1out = encoder1:forward(input)
-    -- local enc2out = encoder2:forward(input)
-
-    -- bug: encoder1.output is nil
-
-    -- print('enc1out')
-    -- print(enc1out)
 
     -- encoder1
     local KLDerr1 = KLD:forward(enc1out, input[1])
-    -- print(input)
-    -- print('hi')
-    -- assert(false)
     local dKLD_dw1 = KLD:backward(enc1out, input[1])
     encoder1:backward(input[1],dKLD_dw1) -- does this go backward through the entire encoder1?
 
@@ -259,29 +221,6 @@ function feval(x)
         print("KLD", KLDerr/input[1]:size(1))
         print("lowerbound", lowerbound/input[1]:size(1))
     end
-
-    --$$$$$$$$$$$$$$$$$$$$$$ From dual objectives
-
-    -- reuse the outputs of the encoders, since they're the same
-
-
-    -- local input1_recon = decoder:forward(encoder1.output)
-    -- loss = loss + criterion:forward(input1_recon, input[1]) / 4
-    -- local grad_output1 = criterion:backward(input1_recon, input[1]) / 4
-    --
-    -- local grad_encoding1 = decoder:backward(encoder1.output, grad_output1)
-    -- encoder1:backward(input[1], grad_encoding1)
-    --
-    --
-    -- local input2_recon = decoder:forward(encoder2.output)
-    -- loss = loss + criterion:forward(input2_recon, input[2]) / 4
-    -- local grad_output2 = criterion:backward(input2_recon, input[2]) / 4
-    --
-    -- local grad_encoding2 = decoder:backward(encoder2.output, grad_output2)
-    -- encoder2:backward(input[2], grad_encoding2)
-
-    --$$$$$$$$$$$$$$$$$$$$$
-
 
     --#######################################################################--
 
