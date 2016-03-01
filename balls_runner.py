@@ -34,33 +34,38 @@ base_networks = {
 jobs = []
 
 # noise_options = [0.1]
-sharpening_rate_options = [10]
-learning_rate_options = [1e-5,2e-5,3e-5]
+# sharpening_rate_options = [10]
+learning_rate_options = [1e-4]
 heads_options = [1]
 numballs_options = [1]
 subsamp_options = [3]
-learning_rate_decay_options = [0.7, 0.5]
-# L2_options = [1e-2, 1e-3, 1e-4]
+dim_hidden_options = [64]
+feature_maps_options = [16]
+L2_options = [1e-2, 1e-3, 1e-4]
 
 # for noise in noise_options:
-for learning_rate_decay in learning_rate_decay_options:
-    for sharpening_rate in sharpening_rate_options:
-        for learning_rate in learning_rate_options:
-            for numballs in numballs_options:
-                for heads in heads_options:
-                    for subsamp in subsamp_options:
-                        job = {
-                                    # "noise": noise,
-                                    "sharpening_rate": sharpening_rate,
-                                    "learning_rate": learning_rate,
-                                    "heads": heads,
-                                    "numballs": numballs,
-                                    "subsample":subsamp,
-                                    "learning_rate_decay": learning_rate_decay
-                                    # "dataset_name": dataset_name
-                                    # "gpu": True,
-                                }
-                        jobs.append(job)
+# for sharpening_rate in sharpening_rate_options:
+for L2 in L2_options:
+    for dh in dim_hidden_options:
+        for fm in feature_maps_options:
+            for learning_rate in learning_rate_options:
+                for numballs in numballs_options:
+                    for heads in heads_options:
+                        for subsamp in subsamp_options:
+                            job = {
+                                        # "noise": noise,
+                                        # "sharpening_rate": sharpening_rate,
+                                        "learning_rate": learning_rate,
+                                        "heads": heads,
+                                        "numballs": numballs,
+                                        "subsample":subsamp,
+                                        "dim_hidden": dh,
+                                        "feature_maps":fm,
+                                        "L2": L2
+                                        # "dataset_name": dataset_name
+                                        # "gpu": True,
+                                    }
+                            jobs.append(job)
 
 
 if dry_run:

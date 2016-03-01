@@ -228,7 +228,7 @@ function feval(x)
     ------------------ regularize -------------------
     if opt.L2 > 0 then
         -- Loss:
-        loss = loss + opt.coefL2 * params:norm(2)^2/2
+        loss = loss + opt.L2 * params:norm(2)^2/2
         -- Gradients:
         grad_params:add( params:clone():mul(opt.L2) )
     end
@@ -274,7 +274,7 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.1e", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
+        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.4e", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
         -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
