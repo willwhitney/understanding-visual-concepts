@@ -115,10 +115,30 @@ model:add(encoder)
 -- model:add(nn.Reparametrize(dim_hidden))
 model:add(decoder)
 
+-- print(encoder:findModules('nn.ConcatTable')[1])
+-- assert(false)
 
-local encoder1 = encoder:findModules('nn.Sequential')[1]:findModules('nn.Sequential')  -- goes up to the z ConcatTable
-local encoder2 = encoder:findModules('nn.Sequential')[2]:findModules('nn.Sequential')  -- okay why doesn't this work?
+-- local encoder1 = encoder:findModules('nn.Sequential')[1]:findModules('nn.Sequential')  -- goes up to the z ConcatTable
+-- local encoder2 = encoder:findModules('nn.Sequential')[2]:findModules('nn.Sequential')  -- okay why doesn't this work?
+
+local encoder1 = encoder:findModules('nn.Sequential')[2]  -- goes up to the z ConcatTable
+local encoder2 = encoder:findModules('nn.Sequential')[4]  -- okay why doesn't this work?
+
+-- print('encoder1')
 -- print(encoder1)
+-- print('encoder2')
+-- print(encoder2)
+-- print('encoderout')
+-- print(encoder.output)
+-- print('encoder1out')
+-- print(encoder1.output)
+-- assert(false)
+
+-- local aaa = encoder:findModules('nn.Sequential')
+-- for i,v in pairs(aaa) do
+--     print(i,v.modules)
+-- end
+-- --print(encoder:findModules('nn.Sequential'))
 -- assert(false)
 
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
@@ -208,21 +228,21 @@ function feval(x)
     -- I guess you can just make encoder1 do the forward on the input
 
 
-    -- local enc1out = encoder1.output
-    -- local enc2out = encoder2.output
-    local enc1out = encoder1:forward(input)
-    local enc2out = encoder2:forward(input)
+    local enc1out = encoder1.output
+    local enc2out = encoder2.output
+    -- local enc1out = encoder1:forward(input)
+    -- local enc2out = encoder2:forward(input)
 
     -- bug: encoder1.output is nil
 
-    print('enc1out')
-    print(enc1out)
+    -- print('enc1out')
+    -- print(enc1out)
 
     -- encoder1
     local KLDerr1 = KLD:forward(enc1out, input[1])
-    print(input)
-    print('hi')
-    assert(false)
+    -- print(input)
+    -- print('hi')
+    -- assert(false)
     local dKLD_dw1 = KLD:backward(enc1out, input[1])
     encoder1:backward(input[1],dKLD_dw1) -- does this go backward through the entire encoder1?
 
@@ -315,7 +335,7 @@ for step = 1, iterations do
     end
 
     if step % opt.print_every == 0 then
-        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.4f", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
+        print(string.format("%d/%d (epoch %.3f), lowerbound = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs, sharpening exp = %2.4f, lr = %2.1e", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time, schedule_weight_exp, optim_state.learningRate))
         -- print(string.format("%d/%d (epoch %.3f), train_loss = %6.8f, grad/param norm = %6.4e, time/batch = %.2fs", step, iterations, epoch, train_loss, grad_params:norm() / params:norm(), time))
     end
 
