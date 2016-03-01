@@ -24,23 +24,23 @@ cmd:option('--frame_interval', 1, 'the number of timesteps between input[1] and 
 
 -- optimization
 cmd:option('--learning_rate', 1e-5, 'learning rate')
-cmd:option('--learning_rate_decay', 0.5, 'learning rate decay')
-cmd:option('--learning_rate_decay_after', 400, 'in number of examples, when to start decaying the learning rate')
-cmd:option('--learning_rate_decay_interval', 100, 'in number of examples, how often to decay the learning rate')
+cmd:option('--learning_rate_decay', 0.97, 'learning rate decay')
+cmd:option('--learning_rate_decay_after', 1000, 'in number of examples, when to start decaying the learning rate')
+cmd:option('--learning_rate_decay_interval', 1000, 'in number of examples, how often to decay the learning rate')
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')  -- this is momentum
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
-cmd:option('--L2', 0, 'amount of L2 regularization')
+cmd:option('--L2', 0.01, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
 cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
 cmd:option('--motion_scale', 3, 'how much to accentuate loss on changing pixels')
 
-cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
-cmd:option('--feature_maps', 72, 'number of feature maps')
+cmd:option('--dim_hidden', 32, 'dimension of the representation layer')
+cmd:option('--feature_maps', 16, 'number of feature maps')
 cmd:option('--color_channels', 1, '1 for grayscale, 3 for color')
-cmd:option('--sharpening_rate', 50, 'number of feature maps')
+cmd:option('--sharpening_rate', 10, 'number of feature maps')
 cmd:option('--noise', 0.1, 'variance of added Gaussian noise')
 
 
@@ -49,7 +49,7 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 -- bookkeeping
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
-cmd:option('--eval_val_every', 100, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
+cmd:option('--eval_val_every', 1000, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
 
 -- data
 cmd:option('--num_train_batches', 9000, 'number of batches to train with per epoch')  -- CHANGE
