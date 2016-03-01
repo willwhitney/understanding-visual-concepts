@@ -118,7 +118,11 @@ for job in jobs:
             slurmfile.write("#SBATCH --gres=gpu:1\n")
             slurmfile.write("#SBATCH --mem=30000\n")
             slurmfile.write("#SBATCH --time=6-23:00:00\n")
-            # slurmfile.write("#SBATCH -x node027\n")
+            slurmfile.write("#SBATCH -x node004\n")
+            slurmfile.write("#SBATCH -x node003\n")
+            slurmfile.write("#SBATCH -x node046\n")
+            slurmfile.write("#SBATCH -x node002\n")
+            slurmfile.write("#SBATCH -x node001\n")
             slurmfile.write(jobcommand)
 
         if not dry_run:
