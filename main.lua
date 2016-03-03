@@ -111,8 +111,8 @@ local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, op
 model:add(encoder)
 model:add(decoder)
 
-local encoder1 = encoder:findModules('nn.Linear')[1]
-local encoder2 = encoder:findModules('nn.Linear')[2]
+local encoder1 = encoder:findModules('nn.Sequential')[1]
+local encoder2 = encoder:findModules('nn.Sequential')[2]
 
 
 if opt.criterion == 'MSE' then
