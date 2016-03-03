@@ -162,7 +162,6 @@ function validate()
         local lowerbound = err + KLDerr -- want to maximize this?
         loss = loss + lowerbound
 
-        -- TODO: do variational stuff here
         -- local step_loss = criterion:forward(output, input[2])
         -- loss = loss + step_loss
     end

@@ -41,7 +41,7 @@ numballs_options = [1]
 subsamp_options = [3]
 dim_hidden_options = [64]
 feature_maps_options = [16]
-L2_options = [1e-2, 1e-3, 1e-4]
+L2_options = [0]
 
 # for noise in noise_options:
 # for sharpening_rate in sharpening_rate_options:
