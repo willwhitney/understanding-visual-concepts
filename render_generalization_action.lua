@@ -3,6 +3,7 @@ require 'cutorch'
 require 'cunn'
 require 'paths'
 require 'lfs'
+require 'modules/Reparametrize'
 
 vis = require 'vis'
 require 'ActionEncoder'
@@ -108,11 +109,6 @@ for _, network in ipairs(networks) do
 
 
 
-
-
-
-
-
             -- local max_indices = {}
             -- for input_index = 1, output:size(1) do
             --     local weights = weight_predictor.output[input_index]:clone()
@@ -136,9 +132,6 @@ for _, network in ipairs(networks) do
                     max_indices[idx] = true
                     weights[idx] = 0
                 end
-
-
-
 
                 for max_index, _ in pairs(max_indices) do
                     collectgarbage()
