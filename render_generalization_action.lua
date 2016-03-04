@@ -71,14 +71,14 @@ for _, network in ipairs(networks) do
         model:evaluate()
 
 
-        local encoder = model.modules[1]
-        local sharpener = encoder:findModules('nn.ScheduledWeightSharpener')[1]
+        local encoder = model.modules[1] -- this should work
+        local sharpener = encoder:findModules('nn.ScheduledWeightSharpener')[1]  -- this should work
         sharpener.iteration_container = scheduler_iteration
         print("Current sharpening: ", sharpener:getP())
 
 
-        local weight_predictor = encoder:findModules('nn.Normalize')[1]
-        local previous_embedding = encoder:findModules('nn.Linear')[1]
+        local weight_predictor = encoder:findModules('nn.Normalize')[1]  -- this should work
+        local previous_embedding = encoder:findModules('nn.Reparametrize')[1]  -- this is the embedding?
         -- local current_embedding = encoder:findModules('nn.Linear')[2]
         local decoder = model.modules[2]
 
