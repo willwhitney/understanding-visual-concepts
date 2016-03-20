@@ -160,7 +160,7 @@ function validate()
         -- encoder2
         local KLDerr2 = KLD:forward(enc2out, input[2])
 
-        local KLDerr = KLDerr1/2 + KLDerr2/2
+        local KLDerr = KLDerr1 + KLDerr2
         local lowerbound = err + KLDerr -- want to maximize this?
         loss = loss + lowerbound
 
@@ -207,14 +207,14 @@ function feval(x)
     -- encoder1
     local KLDerr1 = KLD:forward(enc1out, input[1])
     local dKLD_dw1 = KLD:backward(enc1out, input[1])
-    encoder1:backward(input[1],dKLD_dw1) -- does this go backward through the entire encoder1?
+    encoder1:backward(input[1],dKLD_dw1)
 
     -- encoder2
     local KLDerr2 = KLD:forward(enc2out, input[2])
     local dKLD_dw2 = KLD:backward(enc2out, input[2])
-    encoder1:backward(input[2],dKLD_dw2)  -- does this go backward through the entire encoder2?
+    encoder1:backward(input[2],dKLD_dw2)
 
-    local KLDerr = KLDerr1/2 + KLDerr2/2
+    local KLDerr = KLDerr1 + KLDerr2
     local lowerbound = loss + KLDerr -- want to maximize this?
 
     if opt.verbose then

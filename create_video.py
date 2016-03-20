@@ -27,7 +27,7 @@ def create_gif(images_root):
         end = filename.find('_amount')
         return int(filename[begin:end])
 
-    file_names = sorted([fn for fn in os.listdir(images_root) if fn.endswith('.png')], key=lambda x: img_id(x))
+    file_names = sorted([fn for fn in os.listdir(images_root) if fn.endswith('.png') and not fn.startswith('t')], key=lambda x: img_id(x))
     images = [Image.open(os.path.join(images_root,fn)) for fn in file_names]
     filename = os.path.join(images_root, "gif.GIF")
     # print filename
@@ -35,7 +35,7 @@ def create_gif(images_root):
 
 if __name__ == '__main__':
     root = '/Users/MichaelChang/Dropbox (MIT Solar Car Team)/MacHD/Documents/Important/MIT/Research/SuperUROP/Code/unsupervised-dcign/renderings/mutation'
-    images_root = 'ballsdubhead_Mar_03_19_11'
+    images_root = 'allactiond4_Mar_20_15_09'
     for exp in [f for f in os.listdir(os.path.join(root,images_root)) if '.txt' not in f and not f.startswith('.')]:
         for demo in [f for f in os.listdir(os.path.join(*[root,images_root,exp])) if not f.startswith('.')]:
             print demo
