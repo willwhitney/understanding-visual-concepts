@@ -9,7 +9,6 @@ require 'BallsEncoder'
 require 'Decoder'
 local data_loaders = require 'data_loaders'
 
-
 name = arg[1]
 -- dataset_name = arg[2] or name
 networks = {}
@@ -78,7 +77,7 @@ for _, network in ipairs(networks) do
 
 
         local weight_predictor = encoder:findModules('nn.Normalize')[1]
-        local previous_embedding = encoder:findModules('nn.Linear')[1]
+        local previous_embedding = encoder:findModules('nn.Reparametrize')[1]  -- TODO
         -- local current_embedding = encoder:findModules('nn.Linear')[2]
         local decoder = model.modules[2]
 
@@ -130,9 +129,6 @@ for _, network in ipairs(networks) do
                     max_indices[idx] = true
                     weights[idx] = 0
                 end
-
-
-
 
                 for max_index, _ in pairs(max_indices) do
                     collectgarbage()

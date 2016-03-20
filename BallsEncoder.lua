@@ -74,7 +74,7 @@ local BallsEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     end
 
     for i = 1, num_heads do
-        heads[i] = heads[i]{enc1, enc2}
+        heads[i] = heads[i]{enc1, enc2} -- pass enc1 and enc2 as inputs to head
     end
 
     local dist

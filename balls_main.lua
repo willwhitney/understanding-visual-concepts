@@ -123,11 +123,13 @@ if opt.criterion == 'MSE' then
     criterion = nn.MSECriterion()
 elseif opt.criterion == 'BCE' then
     criterion = nn.BCECriterion()
+    criterion.sizeAverage = false
     -- criterion = nn.MotionBCECriterion(opt.motion_scale)
 else
     error("Invalid criterion specified!")
 end
 KLD = nn.KLDCriterion()  -- variational
+KLD.sizeAverage = false
 
 if opt.gpu then
     model:cuda()
@@ -220,6 +222,7 @@ function feval(x)
         print("KLD", KLDerr/input[1]:size(1))
         print("lowerbound", lowerbound/input[1]:size(1))
     end
+    print(string.format("lowerbound = %6.8f, BCE = %6.8f, KLD = %6.4e", lowerbound/input[1]:size(1), loss/input[1]:size(1), KLDerr/input[1]:size(1)))  -- JUST DID THIS. NEXT TO TEST AND DEBUG
 
     --#######################################################################--
 

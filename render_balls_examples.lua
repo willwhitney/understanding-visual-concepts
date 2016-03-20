@@ -65,8 +65,10 @@ for _, network in ipairs(networks) do
     print("Current sharpening: ", sharpener:getP())
 
     local weight_predictor = encoder:findModules('nn.Normalize')[1]
-    local previous_embedding = encoder:findModules('nn.Linear')[1]
-    local current_embedding = encoder:findModules('nn.Linear')[2]
+    local previous_embedding = encoder:findModules('nn.Reparametrize')[1]
+    local current_embedding = encoder:findModules('nn.Reparametrize')[2]
+    -- local previous_embedding = encoder:findModules('nn.Linear')[1]
+    -- local current_embedding = encoder:findModules('nn.Linear')[2]
     local decoder = model.modules[2]
 
     local images = {}
@@ -74,10 +76,10 @@ for _, network in ipairs(networks) do
         -- fetch a batch
         local input = data_loaders.load_balls_batch(i, 'test')
         local output = model:forward(input):clone()
-        local embedding_from_previous = previous_embedding.output:clone()
+        local embedding_from_previous = previous_embedding.output:clone()  -- TODO here
         local embedding_from_current = current_embedding.output:clone()
 
-        local reconstruction_from_previous = decoder:forward(embedding_from_previous):clone()
+        local reconstruction_from_previous = decoder:forward(embedding_from_previous):clone()  -- TODO here, maybe output isn't correct
         local reconstruction_from_current = decoder:forward(embedding_from_current):clone()
 
         local weight_norms = torch.zeros(output:size(1))
