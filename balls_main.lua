@@ -50,6 +50,8 @@ cmd:option('--max_epochs', 50, 'number of full passes through the training data'
 cmd:option('--seed', 123, 'torch manual random number generator seed')
 cmd:option('--print_every', 1, 'how many steps/minibatches between printing out the loss')
 cmd:option('--eval_val_every', 1000, 'every how many iterations should we evaluate on validation data?')  -- CHANGE
+cmd:option('--save_every', 45000, 'every how many iterations should we save checkpoint')  -- CHANGE
+
 
 -- data
 cmd:option('--num_train_batches', 9000, 'number of batches to train with per epoch')  -- CHANGE
@@ -222,7 +224,7 @@ function feval(x)
         print("KLD", KLDerr/input[1]:size(1))
         print("lowerbound", lowerbound/input[1]:size(1))
     end
-    print(string.format("lowerbound = %6.8f, BCE = %6.8f, KLD = %6.4e", lowerbound/input[1]:size(1), loss/input[1]:size(1), KLDerr/input[1]:size(1)))  -- JUST DID THIS. NEXT TO TEST AND DEBUG
+    print(string.format("lowerbound = %6.8f, BCE = %6.8f, KLD = %6.4e", lowerbound/input[1]:nElement(), loss/input[1]:nElement(), KLDerr/(input[1]:size(1)*opt.dim_hidden)))  -- JUST DID THIS. NEXT TO TEST AND DEBUG
 
     --#######################################################################--
 
@@ -287,23 +289,27 @@ for step = 1, iterations do
         val_losses[step] = val_loss
         print(string.format('[epoch %.3f] Validation loss: %6.8f', epoch, val_loss))
 
-        local model_file = string.format('%s/epoch%.2f_%.4f.t7', savedir, epoch, val_loss)
-        print('saving checkpoint to ' .. model_file)
-        local checkpoint = {}
-        checkpoint.model = model
-        checkpoint.opt = opt
-        checkpoint.train_losses = train_losses
-        checkpoint.val_loss = val_loss
-        checkpoint.val_losses = val_losses
-        checkpoint.step = step
-        checkpoint.epoch = epoch
-        torch.save(model_file, checkpoint)
+        if step % opt.save_every == 0 then
+            local model_file = string.format('%s/epoch%.2f_%.4f.t7', savedir, epoch, val_loss)
+            print('saving checkpoint to ' .. model_file)
+            local checkpoint = {}
+            checkpoint.model = model
+            checkpoint.opt = opt
+            checkpoint.train_losses = train_losses
+            checkpoint.val_loss = val_loss
+            checkpoint.val_losses = val_losses
+            checkpoint.step = step
+            checkpoint.epoch = epoch
+            torch.save(model_file, checkpoint)
+        end
 
         local val_loss_log = io.open(savedir ..'/val_loss.txt', 'a')
         val_loss_log:write(val_loss .. "\n")
         val_loss_log:flush()
         val_loss_log:close()
     end
+
+
 
     if step % 10 == 0 then collectgarbage() end
 

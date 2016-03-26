@@ -35,12 +35,12 @@ jobs = []
 
 # noise_options = [0.1]
 # sharpening_rate_options = [10]
-learning_rate_options = [1e-4]
+learning_rate_options = [1e-4,3e-4]
 heads_options = [1]
 numballs_options = [1]
 subsamp_options = [3]
-dim_hidden_options = [64]
-feature_maps_options = [16]
+dim_hidden_options = [64, 150]
+feature_maps_options = [16, 64]
 L2_options = [0]
 
 # for noise in noise_options:
@@ -74,7 +74,7 @@ else:
     print "Starting jobs:"
 
 for job in jobs:
-    jobname = "ballsvar"
+    jobname = "ballsvar2"
     flagstring = ""
     for flag in job:
         if isinstance(job[flag], bool):
@@ -118,11 +118,6 @@ for job in jobs:
             slurmfile.write("#SBATCH --gres=gpu:1\n")
             slurmfile.write("#SBATCH --mem=30000\n")
             slurmfile.write("#SBATCH --time=6-23:00:00\n")
-            slurmfile.write("#SBATCH -x node004\n")
-            slurmfile.write("#SBATCH -x node003\n")
-            slurmfile.write("#SBATCH -x node046\n")
-            slurmfile.write("#SBATCH -x node002\n")
-            slurmfile.write("#SBATCH -x node001\n")
             slurmfile.write(jobcommand)
 
         if not dry_run:

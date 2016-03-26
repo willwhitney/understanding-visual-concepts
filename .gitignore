@@ -2,7 +2,10 @@
 */.DS_Store
 *.ipynb
 .ipynb_checkpoints
+*.sh
+*.pyc
 sample.lua
+renderings
 data/
 slurm_logs/
 slurm_scripts/
