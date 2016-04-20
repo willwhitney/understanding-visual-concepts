@@ -31,7 +31,7 @@ jobs = []
 
 noise_options = [0.1]
 sharpening_rate_options = [10]
-learning_rate_options = [2e-4]
+learning_rate_options = [2e-4, 1e-4]
 heads_options = [3]
 motion_scale_options = [3]
 frame_interval_options = [3]

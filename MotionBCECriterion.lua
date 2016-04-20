@@ -27,10 +27,10 @@ function MotionBCECriterion:__init(motionScale)
 end
 
 function MotionBCECriterion:updateOutput(input, target)
-   print("input")
-   print(input:size())
-   print("target")
-   print(target:size())
+   -- print("input")
+   -- print(input:size())
+   -- print("target")
+   -- print(target:size())
    -- log(input) * target + log(1 - input) * (1 - target)
 
    self.term1 = self.term1 or input.new()
