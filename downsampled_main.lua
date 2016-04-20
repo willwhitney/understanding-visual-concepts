@@ -102,11 +102,12 @@ end
 local scheduler_iteration = torch.zeros(1)
 
 local model = nn.Sequential()
-model:add(nn.Scale(84, 84, true))
 local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads)
 local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm)
 model:add(encoder)
 model:add(decoder)
+
+local scale = nn.Scale(84, 84, true)
 
 local encoder1 = encoder:findModules('nn.Sequential')[1]
 local encoder2 = encoder:findModules('nn.Sequential')[2]
@@ -135,6 +136,10 @@ function validate()
     for i = 1, opt.num_test_batches do -- iterate over batches in the split
         -- fetch a batch
         local input = data_loaders.load_atari_batch(i, 'test')
+        input = {
+                scale:forward(input[1]),
+                scale:forward(input[2]),
+            }
 
         output = model:forward(input)
 
@@ -156,6 +161,10 @@ function feval(x)
 
     ------------------ get minibatch -------------------
     local input = data_loaders.load_random_atari_batch('train')
+    input = {
+            scale:forward(input[1]),
+            scale:forward(input[2]),
+        }
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode
