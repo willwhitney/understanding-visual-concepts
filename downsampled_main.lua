@@ -4,8 +4,8 @@ require 'optim'
 require 'MotionBCECriterion'
 require 'Scale'
 
-local Encoder = require 'AtariEncoder'
-local Decoder = require 'AtariDecoder'
+local Encoder = require 'DownsampledEncoder'
+local Decoder = require 'DownsampledDecoder'
 
 local data_loaders = require 'data_loaders'
 
@@ -28,13 +28,10 @@ cmd:option('--learning_rate_decay_interval', 4000, 'in number of examples, how o
 cmd:option('--decay_rate', 0.95, 'decay rate for rmsprop')
 cmd:option('--grad_clip', 3, 'clip gradients at this value')
 
-cmd:option('--L2', 0, 'amount of L2 regularization')
 cmd:option('--criterion', 'BCE', 'criterion to use')
-cmd:option('--batch_norm', false, 'use model with batch normalization')
 
 cmd:option('--heads', 1, 'how many filtering heads to use')
 cmd:option('--motion_scale', 1, 'how much to accentuate loss on changing pixels')
-cmd:option('--dual_objectives', false, 'use straight reconstruction as well as sparse transform as objective')
 
 cmd:option('--dim_hidden', 200, 'dimension of the representation layer')
 cmd:option('--feature_maps', 72, 'number of feature maps')
@@ -165,51 +162,12 @@ function feval(x)
 
 
     local loss
-    if not opt.dual_objectives then
-        local output = model:forward(input)
+    local output = model:forward(input)
 
-        loss = criterion:forward(output, input[2])
-        local grad_output = criterion:backward(output, input[2]):clone()
+    loss = criterion:forward(output, input[2])
+    local grad_output = criterion:backward(output, input[2]):clone()
 
-        model:backward(input, grad_output)
-    else
-        -- to weight straight reconstruction and sparse reconstruction equally,
-        -- divide the gradients from sparse reconstruction by 2
-        -- and the gradients from both straight reconstructions by 4
-
-        -- sparse reconstruction first
-        local output = model:forward(input)
-
-        loss = criterion:forward(output, input[2]) / 2
-        local grad_output = criterion:backward(output, input[2]):clone() / 2
-
-        model:backward(input, grad_output)
-
-        -- reuse the outputs of the encoders, since they're the same
-        local input1_recon = decoder:forward(encoder1.output)
-        loss = loss + criterion:forward(input1_recon, input[1]) / 4
-        local grad_output1 = criterion:backward(input1_recon, input[1]) / 4
-
-        local grad_encoding1 = decoder:backward(encoder1.output, grad_output1)
-        encoder1:backward(input[1], grad_encoding1)
-
-
-        local input2_recon = decoder:forward(encoder2.output)
-        loss = loss + criterion:forward(input2_recon, input[2]) / 4
-        local grad_output2 = criterion:backward(input2_recon, input[2]) / 4
-
-        local grad_encoding2 = decoder:backward(encoder2.output, grad_output2)
-        encoder2:backward(input[2], grad_encoding2)
-    end
-
-
-    ------------------ regularize -------------------
-    if opt.L2 > 0 then
-        -- Loss:
-        loss = loss + opt.coefL2 * params:norm(2)^2/2
-        -- Gradients:
-        grad_params:add( params:clone():mul(opt.L2) )
-    end
+    model:backward(input, grad_output)
 
     grad_params:clamp(-opt.grad_clip, opt.grad_clip)
 
