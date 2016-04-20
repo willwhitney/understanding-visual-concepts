@@ -7,13 +7,18 @@ require 'Scale'
 local Encoder = require 'DownsampledEncoder'
 local Decoder = require 'DownsampledDecoder'
 
+local Autoencoder = require 'DownsampledAutoencoder'
+
 local data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
 
 cmd:option('--name', 'net', 'filename to autosave the checkpont to. Will be inside checkpoint_dir/')
 cmd:option('--checkpoint_dir', 'networks', 'output directory where checkpoints get written')
-cmd:option('-import', '', 'initialize network parameters from checkpoint at this path')
+cmd:option('--import', '', 'initialize network parameters from checkpoint at this path')
+
+
+cmd:option('--model', 'disentangled', 'which model to use. disentangled or autoencoder')
 
 -- data
 cmd:option('--datasetdir', '/om/user/wwhitney/deep-game-engine', 'dataset source directory')
@@ -101,16 +106,25 @@ end
 
 local scheduler_iteration = torch.zeros(1)
 
-local model = nn.Sequential()
-local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.heads)
-local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps)
-model:add(encoder)
-model:add(decoder)
+local model
+if opt.model == 'disentangled' then
+    model = nn.Sequential()
+    local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.heads)
+    local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps)
+    model:add(encoder)
+    model:add(decoder)
+elseif opt.model == 'autoencoder' then
+    model = Autoencoder(opt.dim_hidden, opt.color_channels, opt.feature_maps)
+else
+    error("Invalid model type: " ..opt.model)
+end
+
+print(model)
 
 local scale = nn.Scale(84, 84, true)
 
-local encoder1 = encoder:findModules('nn.Sequential')[1]
-local encoder2 = encoder:findModules('nn.Sequential')[2]
+-- local encoder1 = encoder:findModules('nn.Sequential')[1]
+-- local encoder2 = encoder:findModules('nn.Sequential')[2]
 
 -- graph.dot(model.modules[1].fg, 'encoder', 'reports/encoder')
 
@@ -140,10 +154,14 @@ function validate()
                 scale:forward(input[1]),
                 scale:forward(input[2]),
             }
+        local target = input[2]
 
+        if opt.model == 'autoencoder' then
+            input = input[1]
+        end
         output = model:forward(input)
 
-        local step_loss = criterion:forward(output, input[2])
+        local step_loss = criterion:forward(output, target)
         loss = loss + step_loss
     end
 
@@ -165,16 +183,21 @@ function feval(x)
             scale:forward(input[1]),
             scale:forward(input[2]),
         }
+    local target = input[2]
 
     ------------------- forward pass -------------------
     model:training() -- make sure we are in correct mode
 
 
     local loss
+    if opt.model == 'autoencoder' then
+        input = input[1]
+    end
+    -- print(input:size())
     local output = model:forward(input)
-
-    loss = criterion:forward(output, input[2])
-    local grad_output = criterion:backward(output, input[2]):clone()
+    -- print(output:size())
+    loss = criterion:forward(output, target)
+    local grad_output = criterion:backward(output, target):clone()
 
     model:backward(input, grad_output)
 

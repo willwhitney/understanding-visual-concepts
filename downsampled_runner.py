@@ -36,6 +36,7 @@ heads_options = [3]
 motion_scale_options = [3]
 frame_interval_options = [3]
 dataset_name_options = ["space_invaders"]
+model_options = ["disentangled", "autoencoder"]
 # L2_options = [1e-2, 1e-3, 1e-4]
 
 for noise in noise_options:
@@ -45,18 +46,20 @@ for noise in noise_options:
                 for motion_scale in motion_scale_options:
                     for frame_interval in frame_interval_options:
                         for dataset_name in dataset_name_options:
-                            job = {
-                                    "noise": noise,
-                                    "sharpening_rate": sharpening_rate,
-                                    "learning_rate": learning_rate,
-                                    "heads": heads,
-                                    "motion_scale": motion_scale,
-                                    "frame_interval": frame_interval,
-                                    "dataset_name": dataset_name,
+                            for model in model_options:
+                                job = {
+                                        "noise": noise,
+                                        "sharpening_rate": sharpening_rate,
+                                        "learning_rate": learning_rate,
+                                        "heads": heads,
+                                        "motion_scale": motion_scale,
+                                        "frame_interval": frame_interval,
+                                        "dataset_name": dataset_name,
+                                        "model": model,
 
-                                    "gpu": True,
-                                }
-                            jobs.append(job)
+                                        "gpu": True,
+                                    }
+                                jobs.append(job)
 
 
 if dry_run:
@@ -88,7 +91,7 @@ for job in jobs:
             flagstring = flagstring + " --" + flag + " " + str(job[flag])
     flagstring = flagstring + " --name " + jobname
 
-    jobcommand = "th atari_main.lua" + flagstring
+    jobcommand = "th downsampled_main.lua" + flagstring
 
     print(jobcommand)
     if local and not dry_run:
