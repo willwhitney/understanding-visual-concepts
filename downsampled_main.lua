@@ -102,8 +102,8 @@ end
 local scheduler_iteration = torch.zeros(1)
 
 local model = nn.Sequential()
-local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.batch_norm, opt.heads)
-local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.batch_norm)
+local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.heads)
+local decoder = Decoder(opt.dim_hidden, opt.color_channels, opt.feature_maps)
 model:add(encoder)
 model:add(decoder)
 

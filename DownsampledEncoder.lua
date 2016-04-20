@@ -6,9 +6,12 @@ require 'ChangeLimiter'
 require 'Noise'
 require 'ScheduledWeightSharpener'
 
-local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, batch_norm, num_heads)
+local DownsampledEncoder = function(dim_hidden, color_channels, feature_maps, noise, sharpening_rate, scheduler_iteration, num_heads)
 
     local filter_size = 5
+    local stride = 1
+    local padding = 2
+    local encoded_size = 10
     local inputs = {
             nn.Identity()():annotate{name="input1"},
             nn.Identity()():annotate{name="input2"},
@@ -17,29 +20,20 @@ local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     -- make two copies of an encoder
 
     local enc1 = nn.Sequential()
-    enc1:add(nn.SpatialConvolution(color_channels, feature_maps, filter_size, filter_size))
+    enc1:add(nn.SpatialConvolution(color_channels, feature_maps, filter_size, filter_size, stride, stride, padding, padding))
     enc1:add(nn.SpatialMaxPooling(2,2,2,2))
-    if batch_norm then
-        enc1:add(nn.SpatialBatchNormalization(feature_maps))
-    end
     enc1:add(nn.Threshold(0,1e-6))
 
-    enc1:add(nn.SpatialConvolution(feature_maps, feature_maps/2, filter_size, filter_size))
+    enc1:add(nn.SpatialConvolution(feature_maps, feature_maps/2, filter_size, filter_size, stride, stride, padding, padding))
     enc1:add(nn.SpatialMaxPooling(2,2,2,2))
-    if batch_norm then
-        enc1:add(nn.SpatialBatchNormalization(feature_maps/2))
-    end
     enc1:add(nn.Threshold(0,1e-6))
 
-    enc1:add(nn.SpatialConvolution(feature_maps/2, feature_maps/4, filter_size, filter_size))
+    enc1:add(nn.SpatialConvolution(feature_maps/2, feature_maps/4, filter_size, filter_size, stride, stride, padding, padding))
     enc1:add(nn.SpatialMaxPooling(2,2,2,2))
-    if batch_norm then
-        enc1:add(nn.SpatialBatchNormalization(feature_maps/4))
-    end
     enc1:add(nn.Threshold(0,1e-6))
 
-    enc1:add(nn.Reshape((feature_maps/4) * 11))
-    enc1:add(nn.Linear((feature_maps/4) * 11, dim_hidden))
+    enc1:add(nn.Reshape((feature_maps/4) * encoded_size * encoded_size))
+    enc1:add(nn.Linear((feature_maps/4) * encoded_size * encoded_size, dim_hidden))
 
     local enc2 = enc1:clone('weight', 'bias', 'gradWeight', 'gradBias')
     enc1 = enc1(inputs[1])
@@ -82,4 +76,4 @@ local AtariEncoder = function(dim_hidden, color_channels, feature_maps, noise, s
     return nn.gModule(inputs, output)
 end
 
-return AtariEncoder
+return DownsampledEncoder

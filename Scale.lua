@@ -5,7 +5,7 @@ See LICENSE file for full terms of limited license.
 ]]
 
 require "nn"
-require "image"
+local image = require "image"
 
 local scale = torch.class('nn.Scale', 'nn.Module')
 
@@ -15,15 +15,31 @@ function scale:__init(height, width)
     self.width = width
 end
 
+function scale:scale_one(input)
+    -- output:zero():add(0.299, input[1]):add(0.587, input[2]):add(0.114, input[3])
+    local output = image.rgb2y(input:float()) -- turn it into grayscale (luminance)
+    output = (image.scale(output, self.width, self.height, 'bilinear'))
+    return output
+end
+
 function scale:forward(x)
-    local x = x
+    local is_cuda = (x:type() == "torch.CudaTensor")
+    -- self.output = x
     if x:dim() > 3 then
-        x = x[1]
+        self.output = torch.Tensor(x:size(1), 1, self.width, self.height):float()
+        for i = 1, x:size(1) do
+            -- puts the scaled version directly in output
+            self.output[i] = self:scale_one(x[i])
+        end
+    else
+        -- self.output = torch.Tensor(1, self.width, self.height)
+        self.output = self:scale_one(x)
+    end
+    if is_cuda then
+        self.output = self.output:cuda()
     end
 
-    x = image.rgb2y(x)  -- turn it into grayscale (luminance)
-    x = image.scale(x, self.width, self.height, 'bilinear')
-    return x
+    return self.output
 end
 
 function scale:updateOutput(input)
