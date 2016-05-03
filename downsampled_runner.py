@@ -19,47 +19,68 @@ base_networks = {
 
 
 # Don't give it a save name - that gets generated for you
-# jobs = [
-#         {
-#             "import": "onestep",
-#         },
-#
-#
-#     ]
+jobs = [
+        # {
+        #     "noise": 0.1,
+        #     "sharpening_rate": 10,
+        #     "learning_rate": 2e-4,
+        #     "heads": 3,
+        #     "motion_scale": 3,
+        #     "frame_interval": 1,
+        #     "dataset_name": "space_invaders",
+        #     "model": "autoencoder",
 
-jobs = []
+        #     "gpu": True,
+        # },
+        {
+            "noise": 0.1,
+            "sharpening_rate": 10,
+            "learning_rate": 2e-4,
+            "heads": 3,
+            "motion_scale": 3,
+            "frame_interval": 1,
+            "dataset_name": "space_invaders",
+            "model": "disentangled",
 
-noise_options = [0.1]
-sharpening_rate_options = [10]
-learning_rate_options = [2e-4, 1e-4]
-heads_options = [3]
-motion_scale_options = [3]
-frame_interval_options = [3]
-dataset_name_options = ["space_invaders"]
-model_options = ["disentangled", "autoencoder"]
-# L2_options = [1e-2, 1e-3, 1e-4]
+            "gpu": True,
+        },
 
-for noise in noise_options:
-    for sharpening_rate in sharpening_rate_options:
-        for learning_rate in learning_rate_options:
-            for heads in heads_options:
-                for motion_scale in motion_scale_options:
-                    for frame_interval in frame_interval_options:
-                        for dataset_name in dataset_name_options:
-                            for model in model_options:
-                                job = {
-                                        "noise": noise,
-                                        "sharpening_rate": sharpening_rate,
-                                        "learning_rate": learning_rate,
-                                        "heads": heads,
-                                        "motion_scale": motion_scale,
-                                        "frame_interval": frame_interval,
-                                        "dataset_name": dataset_name,
-                                        "model": model,
 
-                                        "gpu": True,
-                                    }
-                                jobs.append(job)
+    ]
+
+# jobs = []
+
+# noise_options = [0.1]
+# sharpening_rate_options = [10]
+# learning_rate_options = [2e-4]
+# heads_options = [3]
+# motion_scale_options = [3]
+# frame_interval_options = [1]
+# dataset_name_options = ["space_invaders"]
+# model_options = ["disentangled", "autoencoder"]
+# # L2_options = [1e-2, 1e-3, 1e-4]
+
+# for noise in noise_options:
+#     for sharpening_rate in sharpening_rate_options:
+#         for learning_rate in learning_rate_options:
+#             for heads in heads_options:
+#                 for motion_scale in motion_scale_options:
+#                     for frame_interval in frame_interval_options:
+#                         for dataset_name in dataset_name_options:
+#                             for model in model_options:
+#                                 job = {
+#                                         "noise": noise,
+#                                         "sharpening_rate": sharpening_rate,
+#                                         "learning_rate": learning_rate,
+#                                         "heads": heads,
+#                                         "motion_scale": motion_scale,
+#                                         "frame_interval": frame_interval,
+#                                         "dataset_name": dataset_name,
+#                                         "model": model,
+
+#                                         "gpu": True,
+#                                     }
+#                                 jobs.append(job)
 
 
 if dry_run:
@@ -106,10 +127,12 @@ for job in jobs:
             slurmfile.write("#SBATCH --job-name"+"=" + jobname + "\n")
             slurmfile.write("#SBATCH --output=slurm_logs/" + jobname + ".out\n")
             slurmfile.write("#SBATCH --error=slurm_logs/" + jobname + ".err\n")
+            slurmfile.write("luarocks install cutorch\n")
+            slurmfile.write("luarocks install cunn\n")
             slurmfile.write(jobcommand)
 
         if not dry_run:
             if 'gpu' in job and job['gpu']:
-                os.system("sbatch -N 1 -c 2 --gres=gpu:1 -p gpu --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+                os.system("sbatch -N 1 -c 2 --gres=gpu:1 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
             else:
                 os.system("sbatch -N 1 -c 2 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")

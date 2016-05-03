@@ -4,12 +4,12 @@ require 'optim'
 require 'MotionBCECriterion'
 require 'Scale'
 
-local Encoder = require 'DownsampledEncoder'
-local Decoder = require 'DownsampledDecoder'
+Encoder = require 'DownsampledEncoder'
+Decoder = require 'DownsampledDecoder'
 
-local Autoencoder = require 'DownsampledAutoencoder'
+Autoencoder = require 'DownsampledAutoencoder'
 
-local data_loaders = require 'data_loaders'
+data_loaders = require 'data_loaders'
 
 local cmd = torch.CmdLine()
 
@@ -103,10 +103,11 @@ print = function(...)
     logfile:flush()
 end
 
+-- this is dumb, but it's the easiest and most portable way
+-- to make this a global variable
+opt.current_scheduler_iteration = 0
 
-local scheduler_iteration = torch.zeros(1)
-
-local model
+-- local model
 if opt.model == 'disentangled' then
     model = nn.Sequential()
     local encoder = Encoder(opt.dim_hidden, opt.color_channels, opt.feature_maps, opt.noise, opt.sharpening_rate, scheduler_iteration, opt.heads)
@@ -121,7 +122,7 @@ end
 
 print(model)
 
-local scale = nn.Scale(84, 84, true)
+scale = nn.Scale(84, 84, true)
 
 -- local encoder1 = encoder:findModules('nn.Sequential')[1]
 -- local encoder2 = encoder:findModules('nn.Sequential')[2]
@@ -143,6 +144,7 @@ end
 params, grad_params = model:getParameters()
 
 
+local sharpener = model.modules[1]:findModules('nn.ScheduledWeightSharpener')[1]
 function validate()
     local loss = 0
     model:evaluate()
@@ -216,7 +218,7 @@ local iterations = opt.max_epochs * opt.num_train_batches
 local loss0 = nil
 
 for step = 1, iterations do
-    scheduler_iteration[1] = step
+    opt.current_scheduler_iteration = step
     epoch = step / opt.num_train_batches
 
     local timer = torch.Timer()
@@ -243,6 +245,8 @@ for step = 1, iterations do
 
     -- every now and then or on last iteration
     if step % opt.eval_val_every == 0 or step == iterations then
+        print(string.format("Weight sharpener exponent at epoch %.3f: %.12f", epoch, sharpener:getP()))
+
         -- evaluate loss on validation data
         local val_loss = validate() -- 2 = validation
         val_losses[step] = val_loss
