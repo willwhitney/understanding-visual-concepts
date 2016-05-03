@@ -7,14 +7,13 @@ taken from https://github.com/kaishengtai/torch-ntm/blob/master/layers/PowTable.
 
 local ScheduledWeightSharpener, parent = torch.class('nn.ScheduledWeightSharpener', 'nn.Module')
 
-function ScheduledWeightSharpener:__init(sharpening_rate, iteration_container)
+function ScheduledWeightSharpener:__init(sharpening_rate)
     parent.__init(self)
     self.slope = sharpening_rate
-    self.iteration_container = iteration_container
 end
 
 function ScheduledWeightSharpener:getP()
-    local iteration = self.iteration_container[1]
+    local iteration = opt.current_scheduler_iteration
     return math.min(1 + (iteration / 10000) * self.slope, 100)
 end
 

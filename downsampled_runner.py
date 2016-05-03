@@ -127,12 +127,12 @@ for job in jobs:
             slurmfile.write("#SBATCH --job-name"+"=" + jobname + "\n")
             slurmfile.write("#SBATCH --output=slurm_logs/" + jobname + ".out\n")
             slurmfile.write("#SBATCH --error=slurm_logs/" + jobname + ".err\n")
-            slurmfile.write("luarocks install cutorch\n")
-            slurmfile.write("luarocks install cunn\n")
+            # slurmfile.write("luarocks install cutorch\n")
+            # slurmfile.write("luarocks install cunn\n")
             slurmfile.write(jobcommand)
 
         if not dry_run:
             if 'gpu' in job and job['gpu']:
-                os.system("sbatch -N 1 -c 2 --gres=gpu:1 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
+                os.system("sbatch -N 1 -c 2 --gres=gpu:titan-x:1 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
             else:
                 os.system("sbatch -N 1 -c 2 --mem=8000 --time=6-23:00:00 slurm_scripts/" + jobname + ".slurm &")
