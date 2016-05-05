@@ -66,7 +66,7 @@ for _, network in ipairs(networks) do
 
         local encoder = model.modules[1]
         local sharpener = encoder:findModules('nn.ScheduledWeightSharpener')[1]
-        sharpener.iteration_container = scheduler_iteration
+        -- sharpener.iteration_container = scheduler_iteration
         print("Current sharpening: ", sharpener:getP())
 
         local weight_predictor = encoder:findModules('nn.Normalize')[1]
@@ -98,8 +98,6 @@ for _, network in ipairs(networks) do
                 weight_norms[input_index] = weights:norm()
             end
             print("Mean independence of weights: ", weight_norms:mean())
-
-
 
 
             -- local max_indices = {}

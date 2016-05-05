@@ -39,8 +39,20 @@ jobs = [
             "heads": 3,
             "motion_scale": 3,
             "frame_interval": 1,
-            "dataset_name": "space_invaders",
+            "dataset_name": "breakout",
             "model": "disentangled",
+
+            "gpu": True,
+        },
+        {
+            "noise": 0.1,
+            "sharpening_rate": 10,
+            "learning_rate": 2e-4,
+            "heads": 3,
+            "motion_scale": 3,
+            "frame_interval": 1,
+            "dataset_name": "breakout",
+            "model": "vanilla",
 
             "gpu": True,
         },
